@@ -30,7 +30,7 @@ Ett exempel på en app som Muscle(tm) kan jämföras med är Strong. Strong är 
 
 ## Teknik
 
-Kunden har specifikt efterfrågat teknikstacken RCSH (Remix, Cloudflare, Supabase, Hyperlane) för att bygga applikationen och Tailwind för design.
+Kunden har specifikt efterfrågat teknikstacken RCS (Remix, Cloudflare, Supabase) för att bygga applikationen och Tailwind för design.
 Detta är en delvis ny teknikstack för mig och jag ser fram emot att lära mig mer om den.
 Jag ser däremot inte den nya teknikstacken som en stor risk faktor då Remix är ett ramverk som bygger på React och jag har tidigare erfarenhet av att bygga applikationer med React.
 
