@@ -5,9 +5,23 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import {
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/cloudflare";
 import { LinksFunction } from "@remix-run/cloudflare";
 import stylesheet from "~/tailwind.css?url";
 import { MainLayout } from "./components/templates/main-layout";
+
+// See if ?code is in the URL, if so, redirect to /login as that comes from either an OAuth2 provider or magic link.
+export async function loader({ context, request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  if (code) {
+    return redirect("/login", { headers: context.headers });
+  }
+  return null;
+}
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
