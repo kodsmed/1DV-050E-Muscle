@@ -1,15 +1,18 @@
-import { vitePlugin as remix } from "@remix-run/dev";
-import { installGlobals } from "@remix-run/node";
+import {
+  vitePlugin as remix,
+  cloudflareDevProxyVitePlugin as remixCloudflareDevProxy,
+} from "@remix-run/dev";
+import { getLoadContext } from "./load-context";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-installGlobals();
-
 export default defineConfig({
+  server: {
+    port: 3000,
+  },
   plugins: [
-    remix({
-      ignoredRouteFiles: ["**/*.css"],
-    }),
+    remixCloudflareDevProxy({ getLoadContext: getLoadContext }),
+    remix(),
     tsconfigPaths(),
   ],
 });
