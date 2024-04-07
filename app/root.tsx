@@ -1,18 +1,23 @@
+import { ReactNode } from "react";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   type MetaFunction,
 } from "@remix-run/react";
 import {
+  json,
   LoaderFunctionArgs,
   redirect,
   LinksFunction,
 } from "@remix-run/cloudflare";
+import { getRole } from "functions/getRole";
 import stylesheet from "~/tailwind.css?url";
 import { MainLayout } from "./components/templates/main-layout";
+import { getUserDetails, UserDetails } from "functions/getUserDetails";
 
 // See if ?code is in the URL, if so, redirect to /login as that comes from either an OAuth2 provider or magic link.
 export async function loader({ context, request }: LoaderFunctionArgs) {
@@ -20,8 +25,27 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   const code = url.searchParams.get("code");
   if (code) {
     return redirect("/login", { headers: context.headers });
+  } else {
+    const response = await context.supabase.auth.getUser();
+    const user = response?.data.user;
+
+    if (!user) {
+      return json({
+        user: 'Anonymous',
+        role: 'ANONYMOUS',
+        userDetails: null
+      });
+    }
+
+    const uuid = user?.id as string;
+    const role = await getRole(uuid, context.supabase);
+    const userDetails = await getUserDetails(uuid, context.supabase);
+    return json({
+      user,
+      role,
+      userDetails
+    });
   }
-  return null;
 }
 
 export const meta: MetaFunction = () => {
@@ -38,7 +62,8 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
+  const { role, userDetails } = useLoaderData<typeof loader>() as { role: string, userDetails: UserDetails};
   return (
     <html lang="en">
       <head>
@@ -48,7 +73,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <MainLayout>{children}</MainLayout>
+        <MainLayout role={role} userDetails={userDetails}>{children}</MainLayout>
         <ScrollRestoration />
         <Scripts />
       </body>

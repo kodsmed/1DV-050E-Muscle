@@ -2,9 +2,9 @@ import {
   json,
   type LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
+import { useLoaderData } from "@remix-run/react";
 import { getRole } from "functions/getRole";
-import { Form, useLoaderData } from "@remix-run/react";
-import { Button } from "~/components/catalyst/button";
+
 
 
 
@@ -23,8 +23,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  console.log("data.user :>> ", data.user);
-  console.log("data.role :>> ", data.role);
+  console.log("Index: data.user :>> ", data.user);
+  console.log("Index: data.role :>> ", data.role);
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
       <h1>Welcome to Remix (with Vite and Cloudflare)</h1>
@@ -44,16 +44,6 @@ export default function Index() {
           </a>
         </li>
       </ul>
-      {data.role ? (<Form action="/logout" method="post">
-        <Button type="submit">Logout</Button>
-      </Form>)
-        : (
-          <Form action="/login" method="get">
-            <Button type="submit">Login</Button>
-          </Form>
-        )
-      }
-
     </div>
   );
 }
