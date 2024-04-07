@@ -2,28 +2,19 @@ import {
   json,
   type LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
+import { getRole } from "functions/getRole";
 import { Form, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/catalyst/button";
 
 
 
 export async function loader({ context }: LoaderFunctionArgs) {
-  const user = await context.supabase.auth.getUser();
+  const response = await context.supabase.auth.getUser();
+  const user = response?.data.user;
 
-  // Retrieve the user's UUID and role from the database
-  const uuid = user?.data?.user?.id;
-  let role = null;
+  const uuid = user?.id as string;
+  const role = await getRole(uuid, context.supabase);
 
-  if (uuid) {
-    const { data, error } = await context.supabase
-      .rpc('getRole', { arguuid: uuid });
-    if (error) {
-      console.error(error);
-    }
-    if (data) {
-      role = data;
-    }
-  }
   return json({
     user,
     role,
