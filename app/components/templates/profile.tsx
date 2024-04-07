@@ -35,7 +35,7 @@ export function ProfileForm({ userDetails }: { userDetails: UserDetails | null }
     if (newWeight > 650) {
       newWeight = 650;
     }
-    
+
     setCurrentWeight(newWeight);
   }
 
