@@ -21,7 +21,7 @@ export function Header({ role, userDetails }: { role: string, userDetails: UserD
   }
 
   return (
-    <div className="h-24 bg-slate-200 w-full flex justify-between">
+    <div className="bg-slate-200 w-full flex justify-between">
       <NavbarLayout links={links} userDetails={userDetails}/>
     </div>
   );
