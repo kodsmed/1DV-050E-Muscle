@@ -9,8 +9,8 @@ import {
 import {
   LoaderFunctionArgs,
   redirect,
+  LinksFunction,
 } from "@remix-run/cloudflare";
-import { LinksFunction } from "@remix-run/cloudflare";
 import stylesheet from "~/tailwind.css?url";
 import { MainLayout } from "./components/templates/main-layout";
 
