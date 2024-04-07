@@ -1,20 +1,11 @@
 import {
   json,
   type LoaderFunctionArgs,
-  type MetaFunction,
 } from "@remix-run/cloudflare";
 import { Form, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/catalyst/button";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    {
-      name: "description",
-      content: "Welcome to Remix! Using Vite and Cloudflare!",
-    },
-  ];
-};
+
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const user = await context.supabase.auth.getUser();

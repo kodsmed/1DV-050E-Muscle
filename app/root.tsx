@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  type MetaFunction,
 } from "@remix-run/react";
 import {
   LoaderFunctionArgs,
@@ -22,6 +23,16 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   }
   return null;
 }
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Muskle - Plan, Perform, Pursue" },
+    {
+      name: "description",
+      content: "Muskle lets you pre-plan your workouts, log as you perform them, and helps you pursue your goals by providing easy logging of your progress and achievements.",
+    },
+  ];
+};
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
