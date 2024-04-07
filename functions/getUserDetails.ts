@@ -18,8 +18,11 @@ export async function getUserDetails(uuid: string, supabase: SupabaseClient) {
       .single();
 
     if (error) {
+      console.log('error :>> ', error)
       return null;
     }
+
+    console.log('data :>> ', data)
 
     if (data) {
       return {
