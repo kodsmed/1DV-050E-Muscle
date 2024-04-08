@@ -23,23 +23,32 @@ import { getUserDetails, UserDetails } from "functions/getUserDetails";
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  let user = null;
   if (code) {
-    return redirect("/login", { headers: context.headers });
+    return redirect("/login", { headers: context.headers});
   } else {
     const response = await context.supabase.auth.getUser();
-    const user = response?.data.user;
+    user = response?.data.user;
 
     if (!user) {
-      return json({
-        user: 'Anonymous',
-        role: 'ANONYMOUS',
-        userDetails: null
-      });
+      if (request.url === "/") {
+        return json({
+          user: 'Anonymous',
+          role: 'ANONYMOUS',
+          userDetails: null
+        });
+      } else {
+        return redirect("/login", { headers: context.headers });
     }
+  }
 
     const uuid = user?.id as string;
     const role = await getRole(uuid, context.supabase);
     const userDetails = await getUserDetails(uuid, context.supabase);
+    if (!userDetails) {
+      return redirect("/profile", { headers: context.headers });
+    }
+
     return json({
       user,
       role,
