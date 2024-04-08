@@ -22,8 +22,6 @@ export async function getUserDetails(uuid: string, supabase: SupabaseClient) {
       return null;
     }
 
-    console.log('data :>> ', data)
-
     if (data) {
       return {
         avatarUrl: data.avatar_url,
