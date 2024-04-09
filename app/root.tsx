@@ -31,7 +31,11 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     user = response?.data.user;
 
     if (!user) {
-      if (request.url === "/") {
+      const requestSegments = request.url.split("/");
+      // Join 3rd to last segment to last segment to get the request path
+      const requestPath = "/" + requestSegments.slice(3, requestSegments.length).join("/");
+      console.log("requestPath :>> ", requestPath);
+      if (requestPath === "/" || requestPath === "/login") {
         return json({
           user: 'Anonymous',
           role: 'ANONYMOUS',
