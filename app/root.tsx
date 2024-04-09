@@ -17,7 +17,7 @@ import {
 import { getRole } from "functions/getRole";
 import stylesheet from "~/tailwind.css?url";
 import { MainLayout } from "./components/templates/main-layout";
-import { getUserDetails, UserDetails } from "functions/getUserDetails";
+import { getUserDetails } from "functions/getUserDetails";
 
 // See if ?code is in the URL, if so, redirect to /login as that comes from either an OAuth2 provider or magic link.
 export async function loader({ context, request }: LoaderFunctionArgs) {
@@ -76,7 +76,10 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { role, userDetails } = useLoaderData<typeof loader>() as { role: string, userDetails: UserDetails};
+  const loaderData = useLoaderData<typeof loader>();
+
+  // Safely access role and userDetails, providing defaults if necessary
+  const { role = 'ANONYMOUS', userDetails = null } = loaderData || {};
   return (
     <html lang="en">
       <head>
