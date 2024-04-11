@@ -14,11 +14,6 @@ export interface ExerciseInterface {
   body_part_secondary: string;
 }
 
-function clicked(event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent, index: number): void {
-  console.log('clicked :>>', index);
-  // Add exercise to session
-}
-
 function textToBodyPart(text: string): string {
   switch (text) {
     case 'Arms':
@@ -35,11 +30,7 @@ function textToBodyPart(text: string): string {
 
 }
 
-
-
-
-
-export function Exercises({ exercises }: { exercises: ExerciseInterface[] }) {
+export function Exercises({ exercises, clickHandler }: { exercises: ExerciseInterface[], clickHandler: (event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent, index: number) => void}) {
   const submit = useSubmit();
   const [expanded, setExpanded] = useState(false);
   const [primaryBodyPart, setPrimaryBodyPart] = useState('Choose');
@@ -74,14 +65,14 @@ export function Exercises({ exercises }: { exercises: ExerciseInterface[] }) {
   }
 
   return (
-    <div className='p-4 w-4/5 m-4'>
+    <div className='p-4 m-4'>
     <h1 className='font-bold text-2xl m-4 inline'>Exercises</h1>
     <Text className='inline'>Click an exercise to add it to your planned session</Text>
       <div className='rounded-lg shadow-md w-full'>
         <ul className="flex flex-wrap">
           {exercises.map((exercise) => (
             <li key={exercise.id}>
-              <ExerciseCard exercise={exercise} clickCallback={(event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent, index: number) => { clicked(event, index) }} index={exercise.id} />
+              <ExerciseCard exercise={exercise} clickCallback={clickHandler} index={exercise.id} />
             </li>
           ))}
           <li>

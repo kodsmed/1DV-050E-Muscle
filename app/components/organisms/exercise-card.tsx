@@ -1,7 +1,7 @@
 import { Arm, Legs, Back, Torso } from 'app/components/atoms/icons';
 import { ExerciseInterface } from 'app/components/organisms/exercises';
 
-function ExerciseIcon ({ exercise }: { exercise: ExerciseInterface }) {
+export function ExerciseIcon ({ exercise }: { exercise: ExerciseInterface }) {
   let Icon
   switch (exercise.body_part) {
     case 'ARM':
