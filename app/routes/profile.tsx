@@ -26,7 +26,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 // handle the incoming form post request
 export async function action({ request, context }: LoaderFunctionArgs) {
   const body = new URLSearchParams(await request.text());
-  const isDefault = body.get('default');
+  const isDefault = body.get('default') === 'true' ? true : false;
   const avatarUrl = body.get('avatarUrl');
   const firstName = body.get('firstName');
   const lastName = body.get('lastName');
@@ -40,6 +40,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   console.log('displayName :>> ', displayName)
   console.log('currentWeight :>> ', currentWeight)
   console.log('targetWeight :>> ', targetWeight)
+  console.log('isDefault :>> ', isDefault)
 
   if (!avatarUrl || !firstName || !lastName || !displayName || !currentWeight || !targetWeight) {
     return json(
