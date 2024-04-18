@@ -13,12 +13,14 @@ import type { Set, TrainingsSession } from "../types/sessions";
 import { Exercises } from "~/components/organisms/exercises";
 import { SessionPlannerForm } from "~/components/templates/session-planner-form";
 import { User } from "@supabase/supabase-js";
+import { updateExistingSession } from "functions/training-sessions/update-existing";
+import { createNewSession } from "functions/training-sessions/create-new";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const userResponse = await context.supabase.auth.getUser();
   const user = userResponse.data?.user;
   if (!user) {
-    return redirect ("/login", { headers: context.headers });
+    return redirect("/login", { headers: context.headers });
   }
   let response = await context.supabase
     .from('exercises')
@@ -33,7 +35,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   response = await context.supabase
     .from('exercise_muscle_group')
     .select('*');
-  const exerciseMuscleGroups = response.data as {id: number, exercise: number, muscle_group: number, order: number}[];
+  const exerciseMuscleGroups = response.data as { id: number, exercise: number, muscle_group: number, order: number }[];
 
   // Add muscle groups to exercises
   exercises.forEach(exercise => {
@@ -72,7 +74,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       .from('training_day_set')
       .select('*')
       .eq('training_day_id', sessionId);
-    const sessionSets = response.data as {id: number, training_day_id: number, set: number}[];
+    const sessionSets = response.data as { id: number, training_day_id: number, set: number }[];
 
     // get all set details
     for (const sessionSet of sessionSets) {
@@ -103,7 +105,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
         .from('exercise_muscle_group')
         .select('*')
         .eq('exercise', set.exercise.id);
-      const exerciseMuscleGroups = response.data as {id: number, exercise: number, muscle_group: number, order: number}[];
+      const exerciseMuscleGroups = response.data as { id: number, exercise: number, muscle_group: number, order: number }[];
 
       set.exercise.muscle_group = exerciseMuscleGroups
         .map(exerciseMuscleGroup => allMuscleGroups.find(muscleGroup => muscleGroup.id === exerciseMuscleGroup.muscle_group))
@@ -126,94 +128,27 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     return redirect("/sessionplanner", { headers: context.headers });
   }
   const session = JSON.parse(rawSession as string) as TrainingsSession;
-
-  let sharedData
-  let sharedError
-  console.log('session :>> ', session);
-  if (session.id) {
-    // update existing training session
-    const {data, error} = await context.supabase
-      .from('training_day')
-      .update({session_name: session.session_name})
-      .eq('id', session.id);
-    // remove all sets for this session
-    await context.supabase
-      .from('training_day_set')
-      .delete()
-      .eq('training_day_id', session.id);
-    sharedData = data;
-    sharedError = error;
+  const sessionsId = session.id || null;
+  if (sessionsId) {
+    updateExistingSession(context.supabase, session, sessionsId);
   } else {
-    // create new training session
-    const {data, error} = await context.supabase
-    .from('training_day')
-    .insert({session_name: session.session_name, owner_uuid: session.owner_uuid, created_at: new Date()})
-    .select();
-    console.log('data :>> ', data);
-    console.log('error :>> ', error);
-    sharedData = data;
-    sharedError = error;
-  }
-  console.log ('sharedData :>> ', sharedData);
-  console.log ('sharedError :>> ', sharedError);
-  if (sharedError || !sharedData) {
-    console.error('Error saving session', sharedError);
-    return redirect("/sessionplanner", { headers: context.headers });
+    createNewSession(context.supabase, session);
   }
 
-  // for each set, save it to the training_day_set table
-  const trainingDaySetArray = [] as {training_day_id: number, set: number}[];
-  for (const set of session.sets) {
-    // Save the set
-    const {data, error} = await context.supabase
-      .from('set')
-      .insert(
-        {
-          exercise: set.exercise.id,
-          weight: set.weight,
-          repetitions: set.repetitions,
-          duration_minutes: set.duration_minutes,
-          owner_uuid: set.owner_uuid,
-          sets: set.sets,
-          rest_minutes: set.rest_minutes
-        }
-      )
-      .select();
-    if (error || !data) {
-      console.error('Error saving set', error);
-      return redirect("/sessionplanner", { headers: context.headers });
-    }
 
-    // Prepare the training_day_set record
-    const setId = data[0].id;
-    trainingDaySetArray.push({training_day_id: sharedData[0].id, set: setId})
-  }
-
-  // Save the training_day_set records
-  const {data, error} = await context.supabase
-    .from('training_day_set')
-    .insert(trainingDaySetArray)
-    .select();
-  if (error || !data) {
-    console.error('Error saving training_day_set', error);
-    return redirect("/sessionplanner", { headers: context.headers });
-  }
-
-   return redirect("/sessions", { headers: context.headers });
+  return redirect("/sessions", { headers: context.headers });
 }
 
 
 export default function SessionPlanner() {
   let emptySets = [] as Set[];
   const data = useLoaderData<typeof loader>();
-  const { exercises, session, sets, user, allMuscleGroups }: {exercises: ExerciseInterface[], session: TrainingsSession, sets: Set[], user: User, allMuscleGroups: MuscleGroup[] } = data
-  console.log ('session in planner :>> ', session);
-  console.log('a')
-  console.log('session.sets :>> ', session.sets)
+  const { exercises, session, user, allMuscleGroups }: { exercises: ExerciseInterface[], session: TrainingsSession, sets: Set[], user: User, allMuscleGroups: MuscleGroup[] } = data
+
   if (session?.sets?.length > 0) {
     emptySets = session.sets;
   }
-  const [ localSets, setLocalSets ] = useState(emptySets)
+  const [localSets, setLocalSets] = useState(emptySets)
   const submit = useSubmit();
 
   console.log("SessionPlanner: data :>> ", exercises);
@@ -221,7 +156,7 @@ export default function SessionPlanner() {
   function addExerciseHandler(exercise: ExerciseInterface): void {
     console.log('clicked :>>', exercise.name);
 
-    const newSet = { id: localSets.length, exercise: exercise, weight: 0, repetitions: 0, duration_minutes: 0, owner_uuid: user.id  } as Set;
+    const newSet = { id: localSets.length, exercise: exercise, weight: 0, repetitions: 0, duration_minutes: 0, owner_uuid: user.id } as Set;
 
     if (localSets.find(set => set.exercise.id === exercise.id)) {
       const confirm = window.confirm('You already have this exercise in this plan. Do you want to add it again?');
@@ -242,9 +177,6 @@ export default function SessionPlanner() {
   }
 
   function savePlannedSession(session: TrainingsSession): void {
-    console.log ('saving session');
-    console.log('session :>> ', session);
-    console.log('sets :>> ', localSets);
     if (!session.session_name || session.session_name === '') {
       alert('Please provide a name for the session');
       return;
@@ -266,8 +198,8 @@ export default function SessionPlanner() {
   return (
     <div className="w-5/6 m-4 p-4">
       <h1 className="font-bold text-4xl">Session planner</h1>
-      <Exercises exercises = {exercises} clickHandler = {addExerciseHandler} muscleGroups={allMuscleGroups}/>
-      <SessionPlannerForm session = { session } sets = { localSets } updateCallback = { updateSet } saveCallback= { savePlannedSession } />
+      <Exercises exercises={exercises} clickHandler={addExerciseHandler} muscleGroups={allMuscleGroups} />
+      <SessionPlannerForm session={session} sets={localSets} updateCallback={updateSet} saveCallback={savePlannedSession} />
     </div>
   )
 }
