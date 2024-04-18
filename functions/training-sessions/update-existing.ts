@@ -19,7 +19,7 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
           repetitions: set.repetitions,
           duration_minutes: set.duration_minutes,
           sets: set.sets,
-          rest_minutes: set.rest_minutes
+          rest_seconds: set.rest_seconds
         })
         .eq('id', set.id);
     });

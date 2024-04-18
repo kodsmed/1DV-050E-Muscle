@@ -29,7 +29,7 @@ export async function createNewSession(client: SupabaseClient, session: Training
             duration_minutes: set.duration_minutes,
             owner_uuid: set.owner_uuid,
             sets: set.sets,
-            rest_minutes: set.rest_minutes
+            rest_seconds: set.rest_seconds
           }
         )
         .select();
