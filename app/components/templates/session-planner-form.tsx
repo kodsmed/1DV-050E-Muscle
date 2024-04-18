@@ -31,16 +31,22 @@ export function SessionPlannerForm(
     console.log('formData :>> ', formData);
     const sessionName = formData.get('name') as string;
     session.session_name = sessionName;
+    session.sets = sets;
+    console.log('session :>> ', session);
     saveCallback(session);
   }
 
   function handleCallback(setData: { id: number, weight: number, repetitions: number, duration: number, sets: number, repRest: number}) {
-    const set = sets[setData.id];
+    console.log('setData :>> ', setData);
+    const set = sets.find(set => set.id === setData.id) || session.sets.find(set => set.id === setData.id);
+    if (!set) {
+      return;
+    }
     set.weight = setData.weight;
     set.repetitions = setData.repetitions;
     set.duration_minutes = setData.duration;
     set.sets = setData.sets;
-    set.rest_minutes = setData.repRest;
+    set.rest_seconds = setData.repRest;
     updateCallback(set);
   }
 

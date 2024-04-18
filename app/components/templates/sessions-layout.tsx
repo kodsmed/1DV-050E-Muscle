@@ -13,6 +13,7 @@ export function SessionsLayout({ sessions }: { sessions: TrainingsSession[] }) {
               <h2 className = 'italic text-lg inline'>Created: {session.created_at?.split('T')[0]}</h2>
               </div>
 
+
               <ul className="flex flex-col space-y-4">
                 {session.sets.map((set) => (
                   <li key={set.id}>
@@ -22,7 +23,7 @@ export function SessionsLayout({ sessions }: { sessions: TrainingsSession[] }) {
                       <p>Repetitions: {set.repetitions}</p>
                       <p>Duration: {set.duration_minutes} minutes</p>
                       <p>Sets: {set.sets}</p>
-                      <p>Rest between sets: {set.rest_minutes} minutes</p>
+                      <p>Rest between sets: {Math.floor(set.rest_seconds / 60) > 0 ? `${Math.floor(set.rest_seconds)}min`:''} {set.rest_seconds % 60}s</p>
                       <div className="flex flex-row gap-4">
                         <a href={ "/sessionplanner?session=" + session.id || '-1' }><Edit /></a><Button><Trashcan /></Button></div>
                     </div>

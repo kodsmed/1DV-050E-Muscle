@@ -16,5 +16,5 @@ export interface Set {
   duration_minutes: number;
   owner_uuid: string;
   sets: number;
-  rest_minutes: number;
+  rest_seconds: number;
 }
