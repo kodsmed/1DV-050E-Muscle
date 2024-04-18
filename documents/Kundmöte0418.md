@@ -22,7 +22,7 @@ Förklarat och motiverat förändringarna i databasen.
 ### Begärda ändringar
 
 - Set.sets skall bara ha +/- 1 knappar för att justera antalet set - ✅
-- Set.rest_minutes skall spåra sekunder istället för minuter, och ha 10, 30 och 60 som inkrement -  
+- Set.rest_minutes skall spåra sekunder istället för minuter, och ha 10, 30 och 60 som inkrement -  ✅
 - Muscle groups skall primärt använda icon_uri för att visa muskelgruppen istället och ha icon_component som fallback i motsats till nuvarande implementation -
 - (önskemål) När träningspasset skapas skall det vara möjligt att välja vilka fält i ett set som skall vara synliga -
 - (önskemål) Set behöver därför tillåta att fält är null -  
