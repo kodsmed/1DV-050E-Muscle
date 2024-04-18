@@ -48,9 +48,9 @@ Träningspass planeringen har implementerats så att användaren nu kan kombiner
 
 ### Begärda ändringar
 
-- Texten "Selected sets" ska ändras till "Selected exercises"
-- Det skall vara möjligt att spara hur många sets (upprepningar) av en övning som skall utföras
-- Det skall vara möjligt att spara hur lång vila som skall vara mellan varje set
+- Texten "Selected sets" ska ändras till "Selected exercises" - ✅
+- Det skall vara möjligt att spara hur många sets (upprepningar) av en övning som skall utföras - ✅
+- Det skall vara möjligt att spara hur lång vila som skall vara mellan varje set - ✅
 - (önskemål) När träningspasset körs skall vila mellan seten vara en timer som räknar ner
-- Utrymmet mellan knapparna för att justera vikt, repetitioner och tid är för litet
-- Exercise skall isället för att ha bodypart och secondary bodypart ha en array av muskelgrupper (muscle groups) som övningen tränar.
+- Utrymmet mellan knapparna för att justera vikt, repetitioner och tid är för litet - ✅
+- Exercise skall isället för att ha bodypart och secondary bodypart ha en array av muskelgrupper (muscle groups) som övningen tränar. - ✅
