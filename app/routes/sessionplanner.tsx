@@ -12,8 +12,9 @@ import type { ExerciseInterface, MuscleGroup } from "../types/exercise";
 import type { Set, TrainingsSession } from "../types/sessions";
 import { Exercises } from "~/components/organisms/exercises";
 import { SessionPlannerForm } from "~/components/templates/session-planner-form";
+import { User } from "@supabase/supabase-js";
 
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ context, request }: LoaderFunctionArgs) {
   const userResponse = await context.supabase.auth.getUser();
   const user = userResponse.data?.user;
   if (!user) {
@@ -44,6 +45,73 @@ export async function loader({ context }: LoaderFunctionArgs) {
     exercise.muscle_group = muscleGroups as MuscleGroup[];
   });
 
+  // Se if there is a query parameter for a session to edit
+  const url = new URL(request.url);
+  const sessionToEdit = url.searchParams.get("session");
+
+  if (sessionToEdit) {
+    const sessionId = parseInt(sessionToEdit);
+    response = await context.supabase
+      .from('training_day')
+      .select('*')
+      .eq('id', sessionId);
+    if (!response.data) {
+      return json({ exercises, session: {} as TrainingsSession, sets: [], user, allMuscleGroups });
+    }
+
+    const session = {} as TrainingsSession;
+    session.id = response.data[0].id;
+    session.session_name = response.data[0].session_name;
+    session.owner_uuid = response.data[0].owner_uuid;
+    session.created_at = response.data[0].created_at;
+    session.sets = [];
+    console.log('session in edit:>> ', session);
+
+    // get all sets for this session
+    response = await context.supabase
+      .from('training_day_set')
+      .select('*')
+      .eq('training_day_id', sessionId);
+    const sessionSets = response.data as {id: number, training_day_id: number, set: number}[];
+
+    // get all set details
+    for (const sessionSet of sessionSets) {
+      response = await context.supabase
+        .from('set')
+        .select('*')
+        .eq('id', sessionSet.set);
+      if (response.data) {
+        const set = response.data[0] as Set;
+        session.sets.push(set);
+      }
+    }
+
+    // get exercise for each set
+    for (const set of session.sets) {
+      response = await context.supabase
+        .from('exercises')
+        .select('*')
+        .eq('id', set.exercise);
+      if (response.data) {
+        set.exercise = response.data[0] as ExerciseInterface;
+      }
+    }
+
+    // Get muscle groups for each exercise
+    for (const set of session.sets) {
+      response = await context.supabase
+        .from('exercise_muscle_group')
+        .select('*')
+        .eq('exercise', set.exercise.id);
+      const exerciseMuscleGroups = response.data as {id: number, exercise: number, muscle_group: number, order: number}[];
+
+      set.exercise.muscle_group = exerciseMuscleGroups
+        .map(exerciseMuscleGroup => allMuscleGroups.find(muscleGroup => muscleGroup.id === exerciseMuscleGroup.muscle_group))
+        .filter(muscleGroup => muscleGroup !== undefined) as MuscleGroup[];
+    }
+    const sets = session.sets as Set[];
+    return json({ exercises, session, sets, user, allMuscleGroups });
+  }
   const session = {} as TrainingsSession;
 
 
@@ -107,7 +175,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
           duration_minutes: set.duration_minutes,
           owner_uuid: set.owner_uuid,
           sets: set.sets,
-          rest_minutes: set.repRest
+          rest_minutes: set.rest_minutes
         }
       )
       .select();
@@ -138,9 +206,12 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 export default function SessionPlanner() {
   let emptySets = [] as Set[];
   const data = useLoaderData<typeof loader>();
-  const { exercises, session, sets, user, allMuscleGroups } = data
-  if (sets.length > 0) {
-    emptySets = sets;
+  const { exercises, session, sets, user, allMuscleGroups }: {exercises: ExerciseInterface[], session: TrainingsSession, sets: Set[], user: User, allMuscleGroups: MuscleGroup[] } = data
+  console.log ('session in planner :>> ', session);
+  console.log('a')
+  console.log('session.sets :>> ', session.sets)
+  if (session?.sets?.length > 0) {
+    emptySets = session.sets;
   }
   const [ localSets, setLocalSets ] = useState(emptySets)
   const submit = useSubmit();

@@ -40,7 +40,7 @@ export function SessionPlannerForm(
     set.repetitions = setData.repetitions;
     set.duration_minutes = setData.duration;
     set.sets = setData.sets;
-    set.repRest = setData.repRest;
+    set.rest_minutes = setData.repRest;
     updateCallback(set);
   }
 
@@ -53,7 +53,7 @@ export function SessionPlannerForm(
         <FieldGroup>
           <Field>
             <Label htmlFor='name'>Session name</Label>
-            <Input type='text' name='name' id='name' placeholder='Session name' />
+            <Input type='text' name='name' id='name' placeholder={session.session_name || 'Session name'} />
           </Field>
         </FieldGroup>
         <h1 className='font-bold text-2xl m-4 inline'>Selected exercises</h1>
@@ -62,12 +62,12 @@ export function SessionPlannerForm(
           <ul className="flex flex-wrap w-fit mr-8">
             {sets.map((set) => (
               <li key={set.id}>
-                <SetCard exercise={set.exercise} index={set.id} updateCallback={handleCallback} />
+                <SetCard exercise={set.exercise} preSet={set} index={set.id} updateCallback={handleCallback} />
               </li>
             ))}
           </ul>
           <div className='w-full flex justify-center items-center'>
-            {sets.length > 0 && <Button type='submit' className="w-4/5">Save</Button>}
+            {(sets && sets?.length) > 0 && <Button type='submit' className="w-4/5">Save</Button>}
           </div>
         </div>
       </div>

@@ -1,3 +1,8 @@
+import {
+  redirect,
+  type LoaderFunctionArgs,
+} from "@remix-run/cloudflare";
+import { useLoaderData } from "@remix-run/react";
 import { ExerciseInterface } from "../types/exercise";
 import { Set, TrainingsSession } from "../types/sessions";
 import { SessionsLayout } from "~/components/templates/sessions-layout";
@@ -7,12 +12,6 @@ import { Text } from "~/components/catalyst/text";
 /**
  * Route for the training sessions planner page
  */
-import {
-  redirect,
-  type LoaderFunctionArgs,
-} from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
-
 export async function loader({ context }: LoaderFunctionArgs) {
   const userResponse = await context.supabase.auth.getUser();
   const user = userResponse.data?.user;
@@ -63,7 +62,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
   console.log ('sessions :>> ', sessions);
   return { sessions };
 }
-
 
 export default function Sessions() {
   const { sessions } = useLoaderData<typeof loader>();

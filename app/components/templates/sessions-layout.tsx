@@ -1,5 +1,6 @@
 import { TrainingsSession } from "app/types/sessions";
-
+import { Edit, Trashcan } from "app/components/atoms/icons";
+import { Button } from "app/components/catalyst/button";
 export function SessionsLayout({ sessions }: { sessions: TrainingsSession[] }) {
   return (
     <div>
@@ -22,6 +23,8 @@ export function SessionsLayout({ sessions }: { sessions: TrainingsSession[] }) {
                       <p>Duration: {set.duration_minutes} minutes</p>
                       <p>Sets: {set.sets}</p>
                       <p>Rest between sets: {set.rest_minutes} minutes</p>
+                      <div className="flex flex-row gap-4">
+                        <a href={ "/sessionplanner?session=" + session.id || '-1' }><Edit /></a><Button><Trashcan /></Button></div>
                     </div>
                   </li>
                 ))}

@@ -81,7 +81,7 @@ export function Arm() {
     <>
       <svg className="h-[48px] w-[48px] text-zinc-950 sm:block dark:text-white forced-colors:text-[CanvasText]" fill="#000000" viewBox="0 0 48 48">
         <g transform="translate(0.000000,48.000000) scale(0.100000,-0.100000)"
-        fill="#000000" stroke="none">
+          fill="#000000" stroke="none">
           <path d="M178 449 c-30 -15 -45 -34 -73 -93 -30 -63 -64 -180 -65 -223 0 -18
             72 -34 154 -35 72 0 73 0 91 -34 10 -19 24 -39 31 -45 40 -33 104 81 112 197
             l5 75 -28 -11 c-15 -6 -42 -8 -60 -4 -20 3 -44 0 -61 -9 -16 -8 -51 -17 -77
@@ -107,7 +107,7 @@ export function Legs() {
     <>
       <svg className="h-[48px] w-[48px] text-zinc-950 sm:block dark:text-white forced-colors:text-[CanvasText]" fill="#000000" viewBox="0 0 48 48">
         <g transform="translate(0.000000,48.000000) scale(0.100000,-0.100000)"
-        fill="#000000" stroke="none">
+          fill="#000000" stroke="none">
           <path d="M163 473 c-27 -5 -58 -80 -50 -120 4 -15 13 -64 22 -108 8 -44 22
           -97 31 -117 15 -34 15 -40 0 -77 -9 -23 -12 -41 -8 -41 13 0 36 76 29 97 -3
           10 -13 36 -21 58 -8 22 -15 57 -16 77 0 21 -7 56 -16 79 -14 33 -15 47 -5 80
@@ -133,11 +133,11 @@ export function Back() {
     <>
       <svg className="h-[48px] w-[48px] text-zinc-950 sm:block dark:text-white forced-colors:text-[CanvasText]" fill="#000000" viewBox="0 0 48 48">
         <g transform="translate(0.000000,48.000000) scale(0.100000,-0.100000)"
-        fill="#000000" stroke="none">
+          fill="#000000" stroke="none">
           <path d="M200 465 c0 -8 -21 -26 -47 -39 -54 -28 -44 -34 16 -10 22 9 43 24
             46 35 8 24 75 28 75 4 0 -17 75 -59 93 -52 7 3 -9 14 -35 26 -27 12 -48 28
             -48 36 0 11 -13 15 -50 15 -37 0 -50 -4 -50 -15z"/>
-          <path d="M256 406 c3 -8 17 -11 35 -8 36 5 30 15 -11 18 -19 1 -27 -2 -24 -10z"/>
+          <path d="M256 406 c3 -8 17 -11 35 -8 36 5 30 15 -11 18 -19 1 -27 -2 -24 -10z" />
           <path d="M115 370 c7 -23 7 -24 -10 -10 -17 14 -18 12 -13 -38 3 -34 13 -63
             27 -80 39 -49 43 -70 25 -124 -9 -27 -13 -52 -10 -55 3 -3 31 -15 62 -25 52
             -18 59 -18 96 -4 21 9 48 16 59 16 19 0 20 4 15 35 -3 19 -9 51 -12 71 -5 27
@@ -170,7 +170,7 @@ export function Torso() {
     <>
       <svg className="h-[48px] w-[48px] text-zinc-950 sm:block dark:text-white forced-colors:text-[CanvasText]" fill="#000000" viewBox="0 0 48 48">
         <g transform="translate(0.000000,48.000000) scale(0.100000,-0.100000)"
-        fill="#000000" stroke="none">
+          fill="#000000" stroke="none">
           <path d="M185 466 c-11 -7 -41 -25 -67 -39 l-46 -27 25 -72 c14 -40 31 -80 39
           -89 9 -10 14 -39 14 -80 0 -57 3 -65 23 -74 14 -6 25 -24 31 -47 9 -35 13 -38
           43 -38 29 0 34 4 40 31 3 17 18 40 34 52 27 19 29 26 29 86 0 41 5 70 14 80
@@ -193,7 +193,7 @@ export function Torso() {
           25 26 -1 7 -10 12 -19 10z"/>
           <path d="M260 250 c0 -11 2 -20 4 -20 2 0 11 -3 20 -6 24 -9 20 23 -4 36 -17
           9 -20 8 -20 -10z"/>
-          <path d="M210 202 c-29 -23 -24 -43 8 -31 13 5 22 17 22 29 0 25 -2 25 -30 2z"/>
+          <path d="M210 202 c-29 -23 -24 -43 8 -31 13 5 22 17 22 29 0 25 -2 25 -30 2z" />
           <path d="M260 195 c0 -8 9 -19 20 -25 17 -9 20 -8 20 9 0 10 -7 22 -16 25 -22
           8 -24 8 -24 -9z"/>
           <path d="M136 49 c-9 -47 -8 -49 24 -49 35 0 40 21 14 58 -21 30 -30 28 -38
@@ -204,4 +204,22 @@ export function Torso() {
       </svg>
     </>
   )
+}
+
+export function Edit() {
+  return <>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+    </svg>
+  </>
+}
+
+export function Trashcan() {
+  return <>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+  </>
+
+
 }

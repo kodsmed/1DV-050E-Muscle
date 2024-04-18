@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { ExerciseInterface } from 'app/types/exercise';
 import { ExerciseIcon } from 'app/components/organisms/exercise-card';
 import { ButtonField } from 'app/components/organisms/button-field';
+import { Set } from '~/types/sessions';
 
 
-export function SetCard({ exercise, index, updateCallback }: { exercise: ExerciseInterface, index: number, updateCallback: (setData: { id: number, weight: number, repetitions: number, duration: number, sets:number, repRest: number }) => void }) {
-  const [weight, setWeight] = useState(0);
-  const [repetitions, setRepetitions] = useState(0);
-  const [minutes, setMinutes] = useState(0);
-  const [stateSets, setSets] = useState(0);
-  const [stateRepRest, setRepRest] = useState(0);
+export function SetCard({ exercise, index, updateCallback, preSet }: { exercise: ExerciseInterface, index: number, updateCallback: (setData: { id: number, weight: number, repetitions: number, duration: number, sets:number, repRest: number }) => void , preSet: Set }) {
+  const [weight, setWeight] = useState(preSet.weight || 0);
+  const [repetitions, setRepetitions] = useState(preSet.repetitions || 0);
+  const [minutes, setMinutes] = useState(preSet.duration_minutes || 0);
+  const [stateSets, setSets] = useState(preSet.sets || 0);
+  const [stateRepRest, setRepRest] = useState(preSet.rest_minutes || 0);
 
   function sendCallback({ id, changedWeight, reps, duration, sets, repRest }: { id: number | null, changedWeight: number | null, reps: number | null, duration: number | null, sets: number | null, repRest: number | null }) {
     updateCallback({ id: id || index, weight: changedWeight || weight, repetitions: reps || repetitions, duration: duration || minutes, sets: sets || stateSets, repRest: repRest || stateRepRest})
