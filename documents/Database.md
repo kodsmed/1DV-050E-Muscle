@@ -31,7 +31,7 @@ and consequently replaces the previous array muscle_groups in exercises. The cha
 - muscle_group is a foreign key to the id of the muscle_group being targeted by an exercise,
 - order is how primarily the exercise targets that muscle_group and replaces the index of the array, 0 is the primary target
 
-## set [ id:int8, exercise: int8, weight: int2, duration_minutes: int4, owner_uuid: uuid, repetitions: int4, sets: int4, rest_minutes: int4 ] pk id
+## set [ id:int8, exercise: int8, weight: int2, duration_minutes: int4, owner_uuid: uuid, repetitions: int4, sets: int4, rest_seconds: int4 ] pk id
 
 this table describes a set, or if you will the planned or taken action of performing the exercise.
 
@@ -42,7 +42,7 @@ this table describes a set, or if you will the planned or taken action of perfor
 - ower_uuid is a foreign key that links the set to the user that planned / preformed it,
 - repetitions is the amounts of times the exercise should be done,
 - sets is the amounts of times the entire set should be repeated,
-- rest_minutes is the time that should pass between sets
+- rest_seconds is the time that should pass between sets
 
 ## training_day [ id: int8, created_at: timestampz, owner_uuid: uuid, session_name: text ] pk id
 
