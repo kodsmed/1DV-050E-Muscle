@@ -1,42 +1,56 @@
 import { Arm, Legs, Back, Torso } from 'app/components/atoms/icons';
-import { ExerciseInterface } from 'app/components/organisms/exercises';
+import { ExerciseInterface } from 'app/types/exercise';
 
-export function ExerciseIcon ({ exercise }: { exercise: ExerciseInterface }) {
+export function ExerciseIcon({ exercise }: { exercise: ExerciseInterface }) {
   let Icon
-  switch (exercise.body_part) {
-    case 'ARM':
-      Icon = <Arm />;
-      break;
-    case 'LEG':
-      Icon = <Legs />;
-      break;
-    case 'BACK':
-      Icon = <Back />;
-      break;
-    case 'TORSO':
-      Icon = <Torso />;
-      break;
-    default:
-      Icon = null;
-  }
+  // Set the primary muscle group icon, use the first one in the list.
+  // Use the componentname if its set, otherwise use the uri.
+  if (exercise.muscle_group.length > 0) {
+    const muscleGroup = exercise.muscle_group[0];
+    if (muscleGroup.icon_component) {
+      // create a component mapping
+      const components = {
+        Arm: <Arm />,
+        Legs: <Legs />,
+        Back: <Back />,
+        Torso: <Torso />,
+      };
+      // try to find the component by name
+      Icon = components[muscleGroup.icon_component as keyof typeof components];
+    } else if (muscleGroup.uri) {
+      Icon = <img src={muscleGroup.uri} alt={muscleGroup.name} />;
+    }
 
-  return (
-    <div className='rounded-full shadow-md'>
-      {Icon}
-    </div>
-  );
+    // If no icon was found, use a default icon
+    if (!Icon) {
+      // if the component is not found, use the uri
+      const source = muscleGroup.uri || "/icons/default.svg";
+      Icon = <img src={source} alt={muscleGroup.name} />;
+    }
+
+    // If no muscle group was found, use a default icon
+    if (!Icon) {
+      Icon = <img src="/icons/default.svg" alt="default icon" />;
+    }
+
+    return (
+      <div className='rounded-full shadow-md'>
+        {Icon}
+      </div>
+    );
+  }
 }
 
-export function ExerciseCard({ exercise, clickCallback, index }: { exercise: ExerciseInterface, clickCallback: (event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent, index: number) => void, index: number}) {
+export function ExerciseCard({ exercise, clickCallback, index }: { exercise: ExerciseInterface, clickCallback: (exercise: ExerciseInterface) => void, index: number}) {
   return (
     <div
       id={exercise.name}
       className="bg-white p-4 rounded-lg shadow-md w-56 m-4"
       role='button'
       tabIndex={index}
-      onMouseDown={(event) => clickCallback(event, index)}
-      onTouchEnd={(event) => clickCallback(event, index)}
-      onKeyDown={(event) => clickCallback(event, index)}
+      onMouseDown={() => clickCallback(exercise)}
+      onTouchEnd={() => clickCallback(exercise)}
+      onKeyDown={() => clickCallback(exercise)}
     >
       <div className="flex justify-left space-x-4 items-center">
         <ExerciseIcon exercise={exercise} />
@@ -46,7 +60,7 @@ export function ExerciseCard({ exercise, clickCallback, index }: { exercise: Exe
   );
 }
 
-export function AddExerciseCard({ clickCallback, index }: { clickCallback: () => void, index: number}) {
+export function AddExerciseCard({ clickCallback, index }: { clickCallback: () => void, index: number }) {
   return (
     <div
       id='add-exercise-card'

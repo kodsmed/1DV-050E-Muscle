@@ -1,23 +1,8 @@
-import { ExerciseInterface } from "~/components/organisms/exercises";
+import { ExerciseInterface } from "../types/exercise";
+import { Set, TrainingsSession } from "../types/sessions";
 import { SessionsLayout } from "~/components/templates/sessions-layout";
 import { Text } from "~/components/catalyst/text";
 
-export interface TrainingsSession {
-  id: number | null;
-  session_name: string;
-  sets: Set[];
-  created_at: string | null;
-  owner_uuid: string | null;
-}
-
-export interface Set {
-  id: number;
-  exercise: ExerciseInterface;
-  repetitions: number;
-  weight: number;
-  duration_minutes: number;
-  owner_uuid: string;
-}
 
 /**
  * Route for the training sessions planner page

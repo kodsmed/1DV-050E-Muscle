@@ -1,4 +1,4 @@
-import { TrainingsSession } from "~/routes/sessions";
+import { TrainingsSession } from "app/types/sessions";
 
 export function SessionsLayout({ sessions }: { sessions: TrainingsSession[] }) {
   return (
@@ -20,6 +20,8 @@ export function SessionsLayout({ sessions }: { sessions: TrainingsSession[] }) {
                       <p>Weight: {set.weight}</p>
                       <p>Repetitions: {set.repetitions}</p>
                       <p>Duration: {set.duration_minutes} minutes</p>
+                      <p>Sets: {set.sets}</p>
+                      <p>Rest between sets: {set.rest_minutes} minutes</p>
                     </div>
                   </li>
                 ))}

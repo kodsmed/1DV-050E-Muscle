@@ -2,13 +2,14 @@
  * Route for the training sessions planner page
  */
 import {
+  json,
   redirect,
   type LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
 import { useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
-import type { ExerciseInterface } from "~/components/organisms/exercises";
-import type { Set, TrainingsSession } from "app/routes/sessions";
+import type { ExerciseInterface, MuscleGroup } from "../types/exercise";
+import type { Set, TrainingsSession } from "../types/sessions";
 import { Exercises } from "~/components/organisms/exercises";
 import { SessionPlannerForm } from "~/components/templates/session-planner-form";
 
@@ -18,15 +19,36 @@ export async function loader({ context }: LoaderFunctionArgs) {
   if (!user) {
     return redirect ("/login", { headers: context.headers });
   }
-  const response = await context.supabase
+  let response = await context.supabase
     .from('exercises')
     .select('*');
   const exercises = response.data as ExerciseInterface[];
+
+  response = await context.supabase
+    .from('muscle_group')
+    .select('*');
+  const allMuscleGroups = response.data as MuscleGroup[];
+
+  response = await context.supabase
+    .from('exercise_muscle_group')
+    .select('*');
+  const exerciseMuscleGroups = response.data as {id: number, exercise: number, muscle_group: number, order: number}[];
+
+  // Add muscle groups to exercises
+  exercises.forEach(exercise => {
+    const muscleGroups = exerciseMuscleGroups
+      .filter(exerciseMuscleGroup => exerciseMuscleGroup.exercise === exercise.id)
+      .map(exerciseMuscleGroup => allMuscleGroups.find(muscleGroup => muscleGroup.id === exerciseMuscleGroup.muscle_group))
+      .filter(muscleGroup => muscleGroup !== undefined); // This line filters out undefined values
+
+    exercise.muscle_group = muscleGroups as MuscleGroup[];
+  });
+
   const session = {} as TrainingsSession;
 
 
   const sets = [] as Set[];
-  return { exercises, session, sets, user };
+  return json({ exercises, session, sets, user, allMuscleGroups });
 }
 
 export async function action({ request, context }: LoaderFunctionArgs) {
@@ -77,7 +99,17 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     // Save the set
     const {data, error} = await context.supabase
       .from('set')
-      .insert({exercise: set.exercise.id, weight: set.weight, repetitions: set.repetitions, duration_minutes: set.duration_minutes, owner_uuid: set.owner_uuid})
+      .insert(
+        {
+          exercise: set.exercise.id,
+          weight: set.weight,
+          repetitions: set.repetitions,
+          duration_minutes: set.duration_minutes,
+          owner_uuid: set.owner_uuid,
+          sets: set.sets,
+          rest_minutes: set.repRest
+        }
+      )
       .select();
     if (error || !data) {
       console.error('Error saving set', error);
@@ -104,18 +136,23 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 
 
 export default function SessionPlanner() {
-  const { exercises, session, sets, user } = useLoaderData<typeof loader>();
-  const [ localSets, setLocalSets ] = useState(sets);
+  let emptySets = [] as Set[];
+  const data = useLoaderData<typeof loader>();
+  const { exercises, session, sets, user, allMuscleGroups } = data
+  if (sets.length > 0) {
+    emptySets = sets;
+  }
+  const [ localSets, setLocalSets ] = useState(emptySets)
   const submit = useSubmit();
 
   console.log("SessionPlanner: data :>> ", exercises);
 
-  function addExerciseHandler(event: React.MouseEvent | React.TouchEvent | React.KeyboardEvent, index: number): void {
-    console.log('clicked :>>', index);
-    const parrentExercise = exercises[index - 1];
-    const newSet = { id: localSets.length, exercise: parrentExercise, weight: 0, repetitions: 0, duration_minutes: 0, owner_uuid: user.id  } as Set;
+  function addExerciseHandler(exercise: ExerciseInterface): void {
+    console.log('clicked :>>', exercise.name);
 
-    if (localSets.find(set => set.exercise.id === parrentExercise.id)) {
+    const newSet = { id: localSets.length, exercise: exercise, weight: 0, repetitions: 0, duration_minutes: 0, owner_uuid: user.id  } as Set;
+
+    if (localSets.find(set => set.exercise.id === exercise.id)) {
       const confirm = window.confirm('You already have this exercise in this plan. Do you want to add it again?');
       if (!confirm) return;
     }
@@ -156,9 +193,9 @@ export default function SessionPlanner() {
   }
 
   return (
-    <div className="w-4/5 m-4 p-4">
+    <div className="w-5/6 m-4 p-4">
       <h1 className="font-bold text-4xl">Session planner</h1>
-      <Exercises exercises = {exercises} clickHandler = {addExerciseHandler} />
+      <Exercises exercises = {exercises} clickHandler = {addExerciseHandler} muscleGroups={allMuscleGroups}/>
       <SessionPlannerForm session = { session } sets = { localSets } updateCallback = { updateSet } saveCallback= { savePlannedSession } />
     </div>
   )

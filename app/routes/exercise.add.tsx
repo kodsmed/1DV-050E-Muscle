@@ -1,5 +1,6 @@
 import { json } from "@remix-run/react";
 import { ActionFunctionArgs, redirect } from "@remix-run/cloudflare";
+import { MuscleGroup } from "~/types/exercise";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   console.log ("action")
@@ -7,10 +8,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   console.log ("body :>> ", body);
   const name = body.get("name") as string;
-  const body_part = body.get("body_part") as string;
-  let body_part_secondary = body.get("body_part_secondary") as string | null;
+  const rawMusclegroup = body.get("muscle_group");
+  const musclegroup = JSON.parse(rawMusclegroup as string) as MuscleGroup[];
+  console.log(rawMusclegroup)
 
-  if (!name || !body_part || !body_part_secondary) {
+  console.log(musclegroup)
+
+  if (!name || !musclegroup || musclegroup.length < 1) {
     return json(
       { message: "Missing required details" },
       {
@@ -20,26 +24,29 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
   }
 
-  if (body_part === body_part_secondary) {
-    return json(
-      { message: "Body part and secondary body part must be different" },
-      {
-        status: 400,
-        statusText: "Body part and secondary body part must be different",
-      }
-    );
-  }
-
-  if (body_part_secondary === "null") {
-    body_part_secondary = null;
-  }
-
-  const response = await context.supabase
+  // Save the new exercise.
+  const {data, error} = await context.supabase
     .from('exercises')
-    .insert([
-      { name, body_part, body_part_secondary }
-    ]);
-  console.log ("response :>> ", response);
+    .insert({ name: name })
+    .select();
+  if (error || !data) {
+    console.error('Error saving exercise', error);
+    return redirect("/sessionplanner", { headers: context.headers });
+  }
+  console.log ("response :>> ", data);
+
+  // Save the muscle groups for the exercise
+  const exerciseId = data[0].id;
+  for (let i = 0; i < musclegroup.length; i++) {
+    const {data, error} = await context.supabase
+      .from('exercise_muscle_group')
+      .insert({ exercise: exerciseId, muscle_group: musclegroup[i].id, order: i})
+      .select();
+    if (error || !data) {
+      console.error('Error saving exercise_muscle_group', error);
+      return redirect("/sessionplanner", { headers: context.headers });
+    }
+  }
 
   return redirect("/sessionplanner", { headers: context.headers });
 }
