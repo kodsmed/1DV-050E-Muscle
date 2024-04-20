@@ -10,6 +10,72 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
       .update({ session_name: session.session_name })
       .eq('id', sessionsId);
 
+    // Get all sets currently in the training_day_set table
+    const { data } = await client
+      .from('training_day_set')
+      .select('set')
+      .eq('training_day_id', sessionsId);
+
+    if (!data) {
+      throw new Error('Error updating session');
+    }
+    console.log('data', data)
+    const existingSets = data as { set: number }[];
+    console.log('existingSets', existingSets)
+
+    // Filter out the sets that are not in the session
+    const setsToDelete = existingSets.filter(set => !session.sets.some(s => s.id === set.set));
+    console.log('setsToDelete', setsToDelete)
+
+    // Delete the sets that are not in the session
+    const deleteSetPromises = setsToDelete.map(set => {
+      return client
+        .from('training_day_set')
+        .delete()
+        .eq('set', set.set);
+    });
+    await Promise.all(deleteSetPromises);
+
+    // Filter out the sets that are new to the session
+    const setsToAdd = session.sets.filter(set => !existingSets.some(s => s.set === set.id));
+    console.log('setsToAdd', setsToAdd)
+
+    // Add the new sets
+    for (const set of setsToAdd) {
+    const addedSet = await client
+    .from('set')
+    .insert(
+      {
+        exercise: set.exercise.id,
+        weight: set.weight,
+        repetitions: set.repetitions,
+        duration_minutes: set.duration_minutes,
+        owner_uuid: set.owner_uuid,
+        sets: set.sets,
+        rest_seconds: set.rest_seconds
+      }
+    )
+    .select();
+    if (!addedSet.data) {
+      throw new Error('Error saving set');
+    }
+    set.id = addedSet.data[0].id;
+    }
+
+    // Add the new sets to the training_day_set table
+    const addSetPromises = setsToAdd.map(set => {
+      return client
+        .from('training_day_set')
+        .insert({
+          training_day_id: sessionsId,
+          set: set.id
+        });
+    });
+    await Promise.all(addSetPromises);
+
+
+
+    // Now that we have the correct training_day_set records, update the set records
     // update sets
     const updateSetPromises = session.sets.map(set => {
       return client
@@ -24,38 +90,6 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
         .eq('id', set.id);
     });
     await Promise.all(updateSetPromises);
-
-    // Get all sets currently in the training_day_set table
-    const { data } = await client
-      .from('training_day_set')
-      .select('set')
-      .eq('training_day_id', sessionsId);
-
-    if (!data) {
-      throw new Error('Error updating session');
-    }
-    const existingSetIds = data.map((set: { set: number }) => set.set);
-
-    // Get all set ids in the session
-    const newSetIds = session.sets.map(set => set.id);
-
-    // Remove sets that are no longer in the session
-    const setsToRemove = existingSetIds.filter(setId => !newSetIds.includes(setId));
-    if (setsToRemove.length > 0) {
-      await client
-        .from('training_day_set')
-        .delete()
-        .in('set', setsToRemove);
-    }
-
-    // Add new sets to the training_day_set table
-    const newSets = session.sets.filter(set => !existingSetIds.includes(set.id));
-    const trainingDaySetArray = newSets.map(set => {
-      return { training_day_id: sessionsId, set: set.id };
-    });
-    await client
-      .from('training_day_set')
-      .insert(trainingDaySetArray);
 
     console.log('session updated')
 
