@@ -11,10 +11,10 @@ export interface TrainingsSession {
 export interface Set {
   id: number;
   exercise: ExerciseInterface;
-  repetitions: number;
-  weight: number;
-  duration_minutes: number;
+  repetitions: number | null;
+  weight: number | null;
+  duration_minutes: number | null;
   owner_uuid: string;
   sets: number;
-  rest_seconds: number;
+  rest_seconds: number | null;
 }

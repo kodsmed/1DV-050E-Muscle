@@ -12,12 +12,14 @@ export function SessionPlannerForm(
     session,
     sets,
     updateCallback,
-    saveCallback
+    saveCallback,
+    removeSetCallback: removeCallback
   }: {
     session: TrainingsSession,
     sets: Set[],
     updateCallback: (set: Set) => void,
     saveCallback: (session: TrainingsSession) => void
+    removeSetCallback: (index: number) => void
   }) {
 
   console.log('session :>> ', session);
@@ -50,6 +52,10 @@ export function SessionPlannerForm(
     updateCallback(set);
   }
 
+  function removeSet(index: number) {
+    removeCallback(index);
+  }
+
   return (
     <Form onSubmit={handleSubmission}>
       <div className='p-4 m-4'>
@@ -63,12 +69,13 @@ export function SessionPlannerForm(
           </Field>
         </FieldGroup>
         <h1 className='font-bold text-2xl m-4 inline'>Selected exercises</h1>
-        <Text className='inline'>Modify weight / repetitions / duration</Text>
+        <Text className='inline'>Modify weight / repetitions / duration.</Text>
+        <Text className='ml-4'>Set any value but sets to zero to mark it as not applicable, meaning it will not be tracked for the exercise.</Text>
         <div className='rounded-lg shadow-md w-full p-4'>
           <ul className="flex flex-wrap w-fit mr-8">
             {sets.map((set) => (
               <li key={set.id}>
-                <SetCard exercise={set.exercise} preSet={set} index={set.id} updateCallback={handleCallback} />
+                <SetCard exercise={set.exercise} preSet={set} index={set.id} updateCallback={handleCallback} removeExerciseCallback={removeSet} />
               </li>
             ))}
           </ul>

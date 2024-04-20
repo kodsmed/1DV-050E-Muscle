@@ -18,6 +18,12 @@ export async function createNewSession(client: SupabaseClient, session: Training
     }
     const trainingDaySetArray = [] as { training_day_id: number, set: number }[];
     for (const set of session.sets) {
+      // Set any key that is 0 to null
+      set.weight = set.weight === 0 ? null : set.weight;
+      set.repetitions = set.repetitions === 0 ? null : set.repetitions;
+      set.duration_minutes = set.duration_minutes === 0 ? null : set.duration_minutes;
+      set.rest_seconds = set.rest_seconds === 0 ? null : set.rest_seconds;
+
       // Save the set
       const { data, error } = await client
         .from('set')

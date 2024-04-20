@@ -1,7 +1,7 @@
 import { Button } from 'app/components/catalyst/button'
 import { Text } from 'app/components/catalyst/text'
 
-export function ButtonField({ prompt, unit, unitsFactor, value, optional, buttonValues, callback }: { prompt: string, unit: string | string[], unitsFactor?:number, value: number, optional: boolean, buttonValues:number[], callback: (value: number) => void }) {
+export function ButtonField({ prompt, unit, unitsFactor, value,  buttonValues, callback, nullAble } : { prompt: string, unit: string | string[], unitsFactor?:number, value: number, buttonValues:number[], callback: (value: number) => void, nullAble?: boolean}) {
   if (!buttonValues || buttonValues.length < 1) {
     return (<div></div>)
   }
@@ -29,12 +29,15 @@ export function ButtonField({ prompt, unit, unitsFactor, value, optional, button
   }
 
   const feedbackString = getFeedbackString({prompt, value, unit, unitsFactor})
+  let applicable = ''
+  if (value === 0 && nullAble) {
+    applicable = 'Not Applicable'
+  }
 
   return (
     <div className='flex-col w-fit'>
       <Text className='text-sm  font-bold text-gray-500'>{ feedbackString }</Text>
-      {optional && <Text className='text-sm text-gray-500 italic'>Optional</Text>}
-      {!optional && <Text className='text-sm text-gray-500'>&nbsp;</Text>}
+      <Text className='text-sm  font-bold text-gray-500'>{ applicable }&nbsp;</Text>
       <div className='flex-col space-y-2 border-2 border-slate-200 p-4 rounded-xl w-full'>
         <div className='flex-row space-x-2 w-full'>
           {buttonValues.map((buttonValue, index) => {

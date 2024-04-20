@@ -156,7 +156,7 @@ export default function SessionPlanner() {
   function addExerciseHandler(exercise: ExerciseInterface): void {
     console.log('clicked :>>', exercise.name);
 
-    const newSet = { id: localSets.length, exercise: exercise, weight: 0, repetitions: 0, duration_minutes: 0, owner_uuid: user.id } as Set;
+    const newSet = { id: localSets.length, exercise: exercise, weight: 10, repetitions: 1, duration_minutes: 1, owner_uuid: user.id, rest_seconds: 60 } as Set;
 
     if (localSets.find(set => set.exercise.id === exercise.id)) {
       const confirm = window.confirm('You already have this exercise in this plan. Do you want to add it again?');
@@ -195,11 +195,16 @@ export default function SessionPlanner() {
     });
   }
 
+  function handleRemoveSet(index: number): void {
+    const updatedSets = localSets.filter(set => set.id !== index);
+    setLocalSets(updatedSets);
+  }
+
   return (
     <div className="w-5/6 m-4 p-4">
       <h1 className="font-bold text-4xl">Session planner</h1>
       <Exercises exercises={exercises} clickHandler={addExerciseHandler} muscleGroups={allMuscleGroups} />
-      <SessionPlannerForm session={session} sets={localSets} updateCallback={updateSet} saveCallback={savePlannedSession} />
+      <SessionPlannerForm session={session} sets={localSets} updateCallback={updateSet} saveCallback={savePlannedSession} removeSetCallback={handleRemoveSet}/>
     </div>
   )
 }
