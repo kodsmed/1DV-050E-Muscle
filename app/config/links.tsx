@@ -9,6 +9,7 @@ export function getLinksForRole(role: string): LinkData[] {
     ];
   } else if (role === "USER") {
     links = [
+      { href: "/session-perform", text: "Perform training" },
       { href: "/sessionplanner", text: "Plan training" },
       { href: "/sessions", text: "My training plans" },
       { href: "/logout", text: "Logout" }

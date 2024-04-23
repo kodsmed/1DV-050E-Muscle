@@ -94,6 +94,7 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
     console.log('session updated')
 
   } catch (error) {
+    console.log('error', error)
     throw new Error('Error updating session');
   }
 }

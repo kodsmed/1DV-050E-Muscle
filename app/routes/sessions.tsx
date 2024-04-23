@@ -57,9 +57,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
     }
   }
 
-
-
-  console.log ('sessions :>> ', sessions);
   return { sessions };
 }
 
@@ -68,7 +65,7 @@ export default function Sessions() {
   return (
     <div className="w-4/5 m-4 p-4">
       <h1 className="font-bold text-4xl">Your planned training sessions</h1>
-      <Text className = 'italic text-lg inline'>Press any training session to modify or delete it... not yet implemented.</Text>
+      <Text className = 'italic text-lg inline'>Press any training session to modify or delete it... delete is not yet implemented.</Text>
       <SessionsLayout sessions = { sessions } />
     </div>
   )

@@ -1,12 +1,12 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TrainingsSession } from "app/types/sessions";
 
-export async function createNewSession(client: SupabaseClient, session: TrainingsSession): Promise<void> {
+export async function createPerformedSession(client: SupabaseClient, session: TrainingsSession): Promise<void> {
+  console.log('creating performed session')
   // create new training session
-  console.log ('creating new session')
   try {
     const { data } = await client
-      .from('training_day')
+      .from('performed_training_day')
       .insert({ session_name: session.session_name, owner_uuid: session.owner_uuid, created_at: new Date() })
       .select();
     if (!data) {
@@ -49,14 +49,15 @@ export async function createNewSession(client: SupabaseClient, session: Training
       trainingDaySetArray.push({ training_day_id: sessionsId, set: setId })
     }
 
-    // Save the training_day_set records
+    // Save the performed_training_day_set records
     const { error } = await client
-      .from('training_day_set')
+      .from('performed_training_day_set')
       .insert(trainingDaySetArray)
       .select();
     if (error) {
       throw new Error('Error saving training_day_set');
     }
+
     console.log('session created')
   } catch (error) {
     console.log('error', error)
