@@ -23,7 +23,7 @@ It names the muscle / muscle group and points to an image resource.
 
 ## exercise_muscle_group [id: int8, exercise: int8, muscle_group: int8, order: int2 ] pk id
 
-this table describes the 1:N relationship between a row in exercises and several rows in muscle_group,
+this table describes the 1:N relationship between a row in exercises and several rows in muscle_group,  
 and consequently replaces the previous array muscle_groups in exercises. The change was due to the almost instant faults of deletion that occurred in the data.
 
 - id is an auto-incremental integer used to identify the tuple,
@@ -55,16 +55,22 @@ this table describes a training_day or training session… that is to say a visi
 
 ## training_day_set [ id: int8, training_day_id: int8, set: int8 ] pk id
 
-this table describes the 1:n relationship between a row in training_day and several  set(s) row(s),
+this table describes the 1:n relationship between a row in training_day and several  set(s) row(s),  
 as an example, what sets are included in "Leg day"
 
 - id is an auto-incremental integer used to identify the tuple,
 - training_day_id is a foreign key to training_day that identifies what training_day the set is added to
 - set is a foreign key that indicates what set is added to the training_day
 
-## preformed_training_day [ id: int8, created_at: timestampz, owner_uuid: uuid, session_name: text ] pk id
+## performed_training_day [ id: int8, created_at: timestampz, owner_uuid: uuid, session_name: text ] pk id
 
-this table describes training_day that is preformed in contrast to planned, see training_day as they are identical in every aspect apart from usage.
+this table describes training_day that is preformed in contrast to planned,  
+see training_day as they are identical in every aspect apart from usage.
+
+## performed_training_day_set [ id: int8, training_day_id: int8, set: int8 ] pk id
+
+this table describes the 1:n relationship between a row in performed_training_day and several set(s) row(s),  
+see training_day_set as they are identical in every aspect apart from usage.
 
 ## program [ id: int8, created_at: timestampz, owner_uuid: uuid, traning_day_id :int8, date: date, status: TRAINING_DAY_STATUS, comment: text ]
 
