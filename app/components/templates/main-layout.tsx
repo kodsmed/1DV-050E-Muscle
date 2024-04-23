@@ -10,7 +10,7 @@ export interface Props {
 
 export function MainLayout({children, role, userDetails}: Props) {
   return (
-    <div className="min-w-[480px] w-full flex flex-col justify-center items-center">
+    <div className="min-w-[480px] w-screen h-full flex flex-col justify-center items-center overflow-hidden">
       <Header role={role} userDetails={userDetails}/>
       {children}
     </div>
