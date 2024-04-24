@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { ExerciseIcon } from 'app/components/organisms/exercise-card';
 import { ButtonField } from 'app/components/organisms/button-field';
 import { Button } from 'app/components/catalyst/button';
+import { Switch, SwitchField } from '../catalyst/switch';
 import { Set } from '~/types/sessions';
+import { Label } from '../catalyst/fieldset';
 
 
 export function PerformableSetCard(
@@ -17,6 +19,7 @@ export function PerformableSetCard(
   const [minutes, setMinutes] = useState(currentSet.duration_minutes || 0);
   const [stateRepRest, setRepRest] = useState(currentSet.rest_seconds || 0);
   const [atSet, setAtSet] = useState(1);
+  const [enableForcedRest, setEnableForcedRest] = useState(true);
   const [resting, setResting] = useState(false);
 
   function setStates({ changedWeight, reps, duration, repRest }: { changedWeight: number | null, reps: number | null, duration: number | null, repRest: number | null }) {
@@ -73,6 +76,11 @@ export function PerformableSetCard(
   }
 
   function waitRestTime(seconds: number = 0) {
+    // If forced rest is disabled return
+    // But if we are already resting, we should continue
+    if (enableForcedRest === false && resting === false) {
+      return;
+    }
     console.log('waitRestTime', seconds)
     if (seconds > 0) {
       setResting(true);
@@ -82,8 +90,8 @@ export function PerformableSetCard(
         waitRestTime(seconds - 1);
       }, 1000);
     } else {
-    setResting(false);
-    setRepRest(currentSet.rest_seconds || 0)
+      setResting(false);
+      setRepRest(currentSet.rest_seconds || 0)
     }
   }
 
@@ -100,6 +108,10 @@ export function PerformableSetCard(
     }
 
     return restTimeString;
+  }
+
+  function toggleEnableRest() {
+    setEnableForcedRest(!enableForcedRest);
   }
 
 
@@ -146,6 +158,12 @@ export function PerformableSetCard(
           </div>
         </div>
       )}
+      {!resting &&
+        <SwitchField title='Enable forced rest' className={'flex flex-row justify-start items-center'}>
+          <Label>Enable forced rest</Label>
+          <Switch type='button' title='Enable forced rest' value={'Enable forced rest'} checked={enableForcedRest} defaultChecked={true} onChange={toggleEnableRest} className={'ml-8 mt-4'} />
+        </ SwitchField>
+      }
     </div >
   );
 }
