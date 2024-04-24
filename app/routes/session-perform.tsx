@@ -21,6 +21,9 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     return redirect("/login", { headers: context.headers });
   }
 
+  // refresh the session to make sure it is up to date and not expires mid-session
+  await context.supabase.auth.refreshSession();
+
   let response = await context.supabase
     .from('training_day')
     .select('*');
