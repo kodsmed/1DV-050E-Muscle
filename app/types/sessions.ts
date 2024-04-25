@@ -17,4 +17,5 @@ export interface Set {
   owner_uuid: string;
   sets: number;
   rest_seconds: number | null;
+  date?: string;
 }

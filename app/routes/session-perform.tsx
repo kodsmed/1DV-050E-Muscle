@@ -12,7 +12,7 @@ import { createPerformedSession } from "../../functions/training-sessions/create
 
 
 /**
- * Route for the training sessions planner page
+ * Route for the training sessions perform page
  */
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const userResponse = await context.supabase.auth.getUser();
