@@ -18,7 +18,6 @@ export function Exercises({ exercises, clickHandler, muscleGroups }: { exercises
 
   function handleSubmission(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log('submitted');
     const interceptedForm = event.currentTarget;
     const formData = new FormData(interceptedForm);
     if (formData.get('name') === '') {
@@ -34,7 +33,6 @@ export function Exercises({ exercises, clickHandler, muscleGroups }: { exercises
       method: 'post',
       action: '/exercise/add',
     });
-    console.log('submitted');
 
     exercises.push({ id: exercises.length + 1, name: formData.get('name') as string, muscle_group: selectedMuscleGroups });
   }

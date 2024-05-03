@@ -7,14 +7,12 @@ export function LineChartWrapper({ allMySets, selectedExercise, selectedTimeFram
   if (!selectedExercise) return null;
 
   // filter out the sets that are for the selected exercise
-  console.log('selectedExercise', selectedExercise);
   const sets = [] as SetDetails[];
   for (const set of allMySets) {
     if (set.exerciseDetails.id === selectedExercise.id) {
       sets.push(set);
     }
   }
-  console.log('sets', sets);
 
   // filter out the sets that are within the selected time frame
   const now = new Date();
@@ -37,7 +35,6 @@ export function LineChartWrapper({ allMySets, selectedExercise, selectedTimeFram
 
   // sort the sets by date
   filteredSets.sort((a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
-  console.log('filteredSets', filteredSets);
 
   // create the data object for the line chart...
   interface DataPoint {
@@ -90,7 +87,6 @@ export function LineChartWrapper({ allMySets, selectedExercise, selectedTimeFram
     category.push('Sets');
     colors.push('green');
   }
-  console.log ('data', data);
 
   return (
     <LineChart

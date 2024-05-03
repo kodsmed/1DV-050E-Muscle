@@ -3,7 +3,6 @@ import { TrainingsSession } from "app/types/sessions";
 
 export async function createNewSession(client: SupabaseClient, session: TrainingsSession): Promise<void> {
   // create new training session
-  console.log ('creating new session')
   try {
     const { data } = await client
       .from('training_day')
@@ -57,7 +56,6 @@ export async function createNewSession(client: SupabaseClient, session: Training
     if (error) {
       throw new Error('Error saving training_day_set');
     }
-    console.log('session created')
   } catch (error) {
     console.log('error', error)
     throw new Error('Error creating session');

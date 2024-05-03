@@ -145,7 +145,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
       set.exercise = exercisesById[set.exercise as number];
     });
   });
-  console.log('allMySessions', allMySessions);
   return json({ allMySessions });
 }
 
@@ -250,13 +249,13 @@ export default function ViewProgress() {
       allMySets.push(set);
     }
   }
-  console.log('allMySets', allMySets);
+
   const allMyExercises = allMySets.map(set => set.exercise) as Exercise[];
-  console.log('allEx', allMyExercises);
+
   // Trim the array to only unique exercises
   const uniqueExercises = allMyExercises.filter((exercise, index, self) => self.findIndex(e => e.id === exercise.id) === index);
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <SelectView allMyExercises={uniqueExercises} setSelectedExercise={setSelectedExercise} setSelectedTimeFrame={setSelectedTimeFrame} />
       <LineChartWrapper allMySets={allMySets} selectedExercise={selectedExercise} selectedTimeFrame={selectedTimeFrame} />
     </div>

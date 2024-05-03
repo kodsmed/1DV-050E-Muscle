@@ -67,7 +67,6 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     session.owner_uuid = response.data[0].owner_uuid;
     session.created_at = response.data[0].created_at;
     session.sets = [];
-    console.log('session in edit:>> ', session);
 
     // get all sets for this session
     response = await context.supabase
@@ -151,10 +150,7 @@ export default function SessionPlanner() {
   const [localSets, setLocalSets] = useState(emptySets)
   const submit = useSubmit();
 
-  console.log("SessionPlanner: data :>> ", exercises);
-
   function addExerciseHandler(exercise: ExerciseInterface): void {
-    console.log('clicked :>>', exercise.name);
 
     const newSet = { id: localSets.length, exercise: exercise, weight: 10, repetitions: 1, duration_minutes: 1, owner_uuid: user.id, rest_seconds: 60 } as Set;
 
@@ -201,7 +197,7 @@ export default function SessionPlanner() {
   }
 
   return (
-    <div className="w-5/6 m-4 p-4">
+    <div className="w-5/6 m-4 p-4 h-full">
       <h1 className="font-bold text-4xl">Session planner</h1>
       <Exercises exercises={exercises} clickHandler={addExerciseHandler} muscleGroups={allMuscleGroups} />
       <SessionPlannerForm session={session} sets={localSets} updateCallback={updateSet} saveCallback={savePlannedSession} removeSetCallback={handleRemoveSet}/>

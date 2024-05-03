@@ -16,7 +16,6 @@ export function PerformSession(
   }
 
   function advanceSet() {
-    console.log('advanceSet in perform-session.tsx');
     // save any changes to the current set
     updateSetCall(session.sets[atSet]);
     advanceSetCallback();

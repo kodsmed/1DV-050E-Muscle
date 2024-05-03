@@ -4,7 +4,6 @@ import { TrainingsSession } from "app/types/sessions";
 // update existing training session
 export async function updateExistingSession(client: SupabaseClient, session: TrainingsSession, sessionsId: number): Promise<void> {
   try {
-    console.log('updating session')
     await client
       .from('training_day')
       .update({ session_name: session.session_name })
@@ -19,13 +18,10 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
     if (!data) {
       throw new Error('Error updating session');
     }
-    console.log('data', data)
     const existingSets = data as { set: number }[];
-    console.log('existingSets', existingSets)
 
     // Filter out the sets that are not in the session
     const setsToDelete = existingSets.filter(set => !session.sets.some(s => s.id === set.set));
-    console.log('setsToDelete', setsToDelete)
 
     // Delete the sets that are not in the session
     const deleteSetPromises = setsToDelete.map(set => {
@@ -38,7 +34,6 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
 
     // Filter out the sets that are new to the session
     const setsToAdd = session.sets.filter(set => !existingSets.some(s => s.set === set.id));
-    console.log('setsToAdd', setsToAdd)
 
     // Add the new sets
     for (const set of setsToAdd) {
@@ -91,7 +86,6 @@ export async function updateExistingSession(client: SupabaseClient, session: Tra
     });
     await Promise.all(updateSetPromises);
 
-    console.log('session updated')
 
   } catch (error) {
     console.log('error', error)
