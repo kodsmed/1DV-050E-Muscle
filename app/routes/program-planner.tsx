@@ -55,6 +55,7 @@ export default function ProgramPlanner() {
   const [selectedSession, setSelectedSession] = useState<TrainingsSession | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [stateProgram, setProgram] = useState<Program[]>(data.program || []);
+  const [comment, setComment] = useState<string>('');
 
   // Function to add a session to the program
   function addProgram() {
@@ -87,6 +88,7 @@ export default function ProgramPlanner() {
   }
 
   function updateComment(program: Program, comment: string) {
+    console.log('comment:', comment)
     program.comment = comment;
     updateProgram(program);
   }
@@ -236,9 +238,9 @@ export default function ProgramPlanner() {
                 </div>
               ) : (
                 <div className="flex flex-row gap-4">
-                  <input type="text" name='comment' placeholder="Add a comment" />
+                  <input type="text" name='comment' placeholder="Add a comment" onChange={(event) => {setComment(event.target.value)}} />
                   <Button onClick={()=> {
-                    updateComment(program, (document.querySelector('input[name="comment"]') as HTMLInputElement).value)
+                    updateComment(program, comment)
                   }}>Add comment</Button>
                 </div>
 
