@@ -14,10 +14,11 @@ import {
   redirect,
   LinksFunction,
 } from "@remix-run/cloudflare";
-import { getRole } from "functions/getRole";
+import { getRole } from "functions/userRole";
 import stylesheet from "~/tailwind.css?url";
 import { MainLayout } from "./components/templates/main-layout";
-import { getUserDetails } from "functions/getUserDetails";
+import { getUserDetails, UserDetails } from "functions/getUserDetails";
+
 
 // See if ?code is in the URL, if so, redirect to /login as that comes from either an OAuth2 provider or magic link.
 export async function loader({ context, request }: LoaderFunctionArgs) {
@@ -25,17 +26,17 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   const code = url.searchParams.get("code");
   let user = null;
   if (code) {
-    return redirect("/login", { headers: context.headers});
+    return redirect("/login", { headers: context.headers });
   } else {
     const response = await context.supabase.auth.getUser();
     user = response?.data.user;
 
+    const requestSegments = request.url.split("/");
+    // Join 3rd to last segment to last segment to get the request path
+    const requestPath = "/" + requestSegments.slice(3, requestSegments.length).join("/");
     if (!user) {
-      const requestSegments = request.url.split("/");
-      // Join 3rd to last segment to last segment to get the request path
-      const requestPath = "/" + requestSegments.slice(3, requestSegments.length).join("/");
-      console.log("requestPath :>> ", requestPath);
-      if (requestPath === "/" || requestPath === "/login") {
+
+      if (requestPath === "/" || requestPath === "/login" || requestPath === "/register") {
         return json({
           user: 'Anonymous',
           role: 'ANONYMOUS',
@@ -43,20 +44,27 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
         });
       } else {
         return redirect("/login", { headers: context.headers });
+      }
     }
-  }
 
     const uuid = user?.id as string;
     const role = await getRole(uuid, context.supabase);
-    const userDetails = await getUserDetails(uuid, context.supabase);
-    if (!userDetails) {
-      return redirect("/profile", { headers: context.headers });
+    const userDetails = await getUserDetails(uuid, context.supabase) as UserDetails | false;
+    let userProfileToPass: UserDetails | null;
+    if (userDetails === false) {
+      if (requestPath !== "/profile") {
+        return redirect("/profile", { headers: context.headers });
+      }
+      userProfileToPass = null;
+    } else {
+      userProfileToPass = userDetails;
     }
+
 
     return json({
       user,
       role,
-      userDetails
+      userDetails: userProfileToPass
     });
   }
 }
