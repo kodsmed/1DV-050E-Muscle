@@ -29,7 +29,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   return json({
     user: user.data.user,
     role,
-    urlBase: request.url.split("?")[0],
+    urlBase: request.url.split("/")?.slice(0, -1).join("/"),
     linkingCode
   });
 }
