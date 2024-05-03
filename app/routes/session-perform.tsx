@@ -24,17 +24,16 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   // refresh the session to make sure it is up to date and not expires mid-session
   await context.supabase.auth.refreshSession();
 
-  let response = await context.supabase
-    .from('training_day')
-    .select('*');
-  const sessions = response.data as TrainingsSession[];
+  const [sessionsResponse, muscleGroupsResponse] = await Promise.all([
+    context.supabase.from('training_day').select('*'),
+    context.supabase.from('muscle_group').select('*')
+  ]);
 
-  response = await context.supabase
-    .from('muscle_group')
-    .select('*');
-  const allMuscleGroups = response.data as MuscleGroup[];
+  const sessions = sessionsResponse.data as TrainingsSession[];
+  const allMuscleGroups = muscleGroupsResponse.data as MuscleGroup[];
 
   // get all sets for each session and adjust the data structure
+  let response;
   for (const session of sessions) {
     session.sets = [] as Set[];
     response = await context.supabase
@@ -101,7 +100,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   }
 
   const client = context.supabase;
-  return { sessions, preSelectedSession, client};
+  return { sessions, preSelectedSession, client };
 }
 
 export async function action({ request, context }: LoaderFunctionArgs) {
@@ -117,7 +116,6 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 
 export default function SessionPerform() {
   const { sessions, preSelectedSession } = useLoaderData<typeof loader>() as { sessions: TrainingsSession[], preSelectedSession: TrainingsSession | null };
-  console.log('preSelectedSession', sessions)
   const [selectedSession, setSelectedSession] = useState<TrainingsSession | null>(preSelectedSession);
   const [atSet, setAtSet] = useState<number>(0);
   const [done, setDone] = useState<boolean>(false);
@@ -134,7 +132,6 @@ export default function SessionPerform() {
   }
 
   function advanceSet() {
-    console.log('advanceSet in session-perform.tsx')
     if (!selectedSession) {
       return;
     }
