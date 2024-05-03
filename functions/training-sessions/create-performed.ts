@@ -1,10 +1,12 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { TrainingsSession } from "app/types/sessions";
+import { TRAINING_DAY_STATUS } from "app/types/enums";
+import { toShortDateString } from "functions/toShortDateString";
 
 export async function createPerformedSession(client: SupabaseClient, session: TrainingsSession): Promise<void> {
-  console.log('creating performed session')
   // create new training session
   try {
+    const nativeId = session.id;
     const { data } = await client
       .from('performed_training_day')
       .insert({ session_name: session.session_name, owner_uuid: session.owner_uuid, created_at: new Date() })
@@ -58,7 +60,15 @@ export async function createPerformedSession(client: SupabaseClient, session: Tr
       throw new Error('Error saving training_day_set');
     }
 
-    console.log('session created')
+    // Check if the session and date was part of the users program and if so update the status to done
+    // we don't care if this fails, it just means the session was not part of the program...
+    // also we don't need the result, so no need to check for data
+    await client
+      .from('program')
+      .update({ status: TRAINING_DAY_STATUS.DONE })
+      .eq('training_day_id', nativeId)
+      .eq('date', toShortDateString(new Date(data[0].created_at)));
+
   } catch (error) {
     console.log('error', error)
     throw new Error('Error creating session');
