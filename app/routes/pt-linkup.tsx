@@ -81,7 +81,7 @@ export default function PTLinkup() {
   }
 
   return (
-    <div>
+    <div className="h-full">
       <h1>Linking with {data.trainerDetails.displayName}</h1>
       <p>Click the button below to confirm that you want to link up with {data.trainerDetails.displayName}</p>
       <p>Doing so allows the trainer to see your performance data and make plans and programs on your behalf.</p>
