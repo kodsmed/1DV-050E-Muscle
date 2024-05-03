@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ExerciseIcon } from 'app/components/organisms/exercise-card';
 import { ButtonField } from 'app/components/organisms/button-field';
 import { Button } from 'app/components/catalyst/button';
@@ -21,6 +21,16 @@ export function PerformableSetCard(
   const [atSet, setAtSet] = useState(1);
   const [enableForcedRest, setEnableForcedRest] = useState(true);
   const [resting, setResting] = useState(false);
+  const [skipRest, setSkipRest] = useState(false);
+  let timeoutId: any
+
+  useEffect(() => {
+    if (skipRest && resting) {
+      clearTimeout(timeoutId);
+      setResting(false);
+    }
+  }, [skipRest, resting, timeoutId])
+
 
   function setStates({ changedWeight, reps, duration, repRest }: { changedWeight: number | null, reps: number | null, duration: number | null, repRest: number | null }) {
 
@@ -66,6 +76,8 @@ export function PerformableSetCard(
 
   function updateSets() {
     waitRestTime(stateRepRest);
+    setSkipRest(false);
+    setRepRest(currentSet.rest_seconds || 0)
     updateCallback(currentSet)
     if (atSet < currentSet.sets) {
       setAtSet(atSet + 1);
@@ -78,20 +90,17 @@ export function PerformableSetCard(
   function waitRestTime(seconds: number = 0) {
     // If forced rest is disabled return
     // But if we are already resting, we should continue
-    if (enableForcedRest === false && resting === false) {
+    if ((enableForcedRest === false && resting === false) || skipRest === true) {
       return;
     }
-    console.log('waitRestTime', seconds)
     if (seconds > 0) {
       setResting(true);
-      setTimeout(() => {
-        console.log('tick')
+      timeoutId = setTimeout(() => {
         setRepRest(seconds - 1);
         waitRestTime(seconds - 1);
       }, 1000);
     } else {
       setResting(false);
-      setRepRest(currentSet.rest_seconds || 0)
     }
   }
 
@@ -114,8 +123,6 @@ export function PerformableSetCard(
     setEnableForcedRest(!enableForcedRest);
   }
 
-
-  console.log('currentSet', currentSet)
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md w-full m-4">
@@ -152,9 +159,10 @@ export function PerformableSetCard(
             <h2 className="font-bold text-1xl">{currentSet.exercise.name}</h2>
             <h3 className='text-md text-slate-700'>{currentSet.sets} sets</h3>
           </div>
-          <div className='flex flex-row  flex-wrap gap-4 w-full'>
-            <div className='text-2xl font-bold'>Rest</div>
-            <div className='text-2xl font-bold'>{getRestTimeString()}</div>
+          <div className='flex flex-row gap-4 w-full items-center'>
+            <p className='text-2xl font-bold'>Rest</p>
+            <p className='text-2xl font-bold'>{getRestTimeString()}</p>
+            {skipRest === false && (<Button onClick={() => { setSkipRest(true)}} className={'mt-2'}><p className='px-8'>Skip</p></Button>)}
           </div>
         </div>
       )}
