@@ -7,20 +7,26 @@ import { useLoaderData } from "@remix-run/react";
 import { getUserDetails, UserDetails } from "functions/getUserDetails";
 
 export async function loader({ context }: LoaderFunctionArgs) {
+
   const response = await context.supabase.auth.getUser();
   const user = response?.data.user;
-
-  if (!user) {
+  const uuid = user?.id as string;
+  try {
+    const userDetails = await getUserDetails(uuid, context.supabase) as UserDetails | false;
+    if (userDetails === false) {
+      return json({
+        userDetails: false
+      });
+    } else {
+      return json({
+        userDetails
+      });
+    }
+  } catch (error) {
     return json({
-      userDetails: null
+      userDetails: false
     });
   }
-
-  const uuid = user?.id as string;
-  const userDetails = await getUserDetails(uuid, context.supabase) as UserDetails | null;
-  return json({
-    userDetails
-  });
 }
 
 // handle the incoming form post request
@@ -33,14 +39,6 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   const displayName = body.get('displayName');
   const currentWeight = body.get('currentWeight');
   const targetWeight = body.get('targetWeight');
-
-  console.log('avatarUrl :>> ', avatarUrl)
-  console.log('firstName :>> ', firstName)
-  console.log('lastName :>> ', lastName)
-  console.log('displayName :>> ', displayName)
-  console.log('currentWeight :>> ', currentWeight)
-  console.log('targetWeight :>> ', targetWeight)
-  console.log('isDefault :>> ', isDefault)
 
   if (!avatarUrl || !firstName || !lastName || !displayName || !currentWeight || !targetWeight) {
     return json(
@@ -95,7 +93,7 @@ export async function action({ request, context }: LoaderFunctionArgs) {
 
 export default function Profile() {
   const data = useLoaderData<typeof loader>();
-  const userDetails = data.userDetails;
+  const userDetails = data.userDetails === false ? null : data.userDetails as UserDetails;
   return (
     <ProfileForm userDetails={userDetails} />
   );

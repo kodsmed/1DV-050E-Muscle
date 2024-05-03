@@ -13,6 +13,17 @@ export function getLinksForRole(role: string): LinkData[] {
       { href: "/sessionplanner", text: "Plan training" },
       { href: "/sessions", text: "My training plans" },
       { href: "/view-progress", text: "View progress"},
+      { href: "/program-planner", text: "Training program"},
+      { href: "/logout", text: "Logout" },
+    ];
+  } else if (role === "TRAINER") {
+    links = [
+      { href: "/session-perform", text: "Perform training" },
+      { href: "/sessionplanner", text: "Plan training" },
+      { href: "/sessions", text: "My training plans" },
+      { href: "/view-progress", text: "View progress"},
+      { href: "/program-planner", text: "Training program"},
+      { href: "/clients", text: "My clients"},
       { href: "/logout", text: "Logout" },
     ];
   } else if (role === "ADMIN") {

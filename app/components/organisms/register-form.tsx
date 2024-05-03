@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Form, Link } from "@remix-run/react";
 import { Button } from "../catalyst/button";
 import { Input } from "../catalyst/input";
 import { Google } from "../atoms/icons";
+import { Switch, SwitchField } from "../catalyst/switch";
+import { Label } from '../catalyst/fieldset';
 
 export default function RegisterForm() {
+  const [personalTrainer, setPersonalTrainer] = useState(false);
   return (
     <div className="flex min-h-full h-[calc(100vh-64px)] flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -66,6 +70,24 @@ export default function RegisterForm() {
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <SwitchField title="Personal Trainer">
+                <Label>Are you a personal trainer?</Label>
+                <Switch
+                  type="button"
+                  title="Personal Trainer"
+                  name="personalTrainer"
+                  value={personalTrainer ? "TRAINER" : "USER"}
+                  defaultValue={personalTrainer ? "TRAINER" : "USER"}
+                  defaultChecked={personalTrainer}
+                  checked={personalTrainer}
+                  onChange={() => setPersonalTrainer(!personalTrainer)}
+                />
+                {personalTrainer ? (<p>I am a personal trainer</p>) : (<p>I am a regular user</p>)}
+              </SwitchField>
+
             </div>
 
             <div>

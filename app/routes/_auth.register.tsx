@@ -32,6 +32,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const email = body.get("email") as string;
   const password = body.get("password") as string;
   const password2 = body.get("password2") as string;
+  const role = body.get("personalTrainer") === "TRAINER" ? "TRAINER" : "USER";
+
 
   if (!email || !password || !password2) {
     return json(
@@ -51,7 +53,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    await context.supabase.auth.signUp({ email, password });
+    const { data } = await context.supabase.auth.signUp({ email, password });
+    const userUUID = data?.user?.id;
+
+    if (userUUID) {
+      await context.supabase.from('user_role').insert([{ uuid: userUUID, role: role }]);
+    }
+
   } catch (error) {
     // TODO: Handle error better
     return json(
