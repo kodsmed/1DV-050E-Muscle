@@ -50,7 +50,7 @@ export function ProfileForm({ userDetails }: { userDetails: UserDetails | null }
   }
 
   return (
-    <div className="flex flex-col items-center mt-8 space-y-4">
+    <div className="flex flex-col items-center space-y-2 h-full overflow-y-auto">
       <Form action="/profile" method="post">
         <input type="hidden" name="default" value={isDefault ? 'true' : 'false'} />
         {isDefault && <Text className="text-center font-bold mb-4">It appears you do not have a profile, please provide your information below</Text>}
@@ -70,7 +70,7 @@ export function ProfileForm({ userDetails }: { userDetails: UserDetails | null }
             </FieldGroup>
           </div>
         </div>
-        <div className="flex flex-col items-center w-fit bg-white rounded-lg shadow-md p-4 pt-4">
+        <div className="flex flex-col items-center w-fit bg-white rounded-lg shadow-md p-4 pt-2">
           <div className="flex justify-between space-x-4 w-[32rem] truncate">
             <FieldGroup>
               <h1 className="text-2xl font-semibold mt-4">
@@ -86,29 +86,31 @@ export function ProfileForm({ userDetails }: { userDetails: UserDetails | null }
             </FieldGroup>
           </div>
         </div>
-        <div className="flex flex-col items-center w-fit bg-white rounded-lg shadow-md p-4 pt-4">
+        <div className="flex flex-col items-center w-fit bg-white rounded-lg shadow-md p-4 pt-2">
           <div className="flex justify-between space-x-4 w-[32rem] truncate">
             <FieldGroup>
               <h1 className="text-2xl font-semibold mt-4">
                 {firstName} {lastName}
               </h1>
-              <Field>
-                <Label>First name</Label>
-                <Input className="w-96" type="text" name="firstName" maxLength={128} value={firstName} onChange={(event) => { setFirstName(event.target.value) }}>
-                </Input>
-              </Field>
-              <Field>
-                <Label>Sir name</Label>
-                <Input className="w-96" type="text" name="lastName" maxLength={128} value={lastName} onChange={(event) => { setLastName(event.target.value) }}>
-                </Input>
-              </Field>
+              <div className="flex flex-row space-x-4">
+                <Field>
+                  <Label>First name</Label>
+                  <Input className="w-96" type="text" name="firstName" maxLength={128} value={firstName} onChange={(event) => { setFirstName(event.target.value) }}>
+                  </Input>
+                </Field>
+                <Field>
+                  <Label>Sir name</Label>
+                  <Input className="w-96" type="text" name="lastName" maxLength={128} value={lastName} onChange={(event) => { setLastName(event.target.value) }}>
+                  </Input>
+                </Field>
+              </div>
             </FieldGroup>
           </div>
         </div>
-        <div className="flex flex-col items-center w-fit bg-white rounded-lg shadow-md p-4 pt-4">
+        <div className="flex flex-col items-center w-fit bg-white rounded-lg shadow-md p-4 pt-2">
           <div className="w-[32rem]">
             <FieldGroup>
-              <h1 className="text-2xl font-semibold mt-4">
+              <h1 className="text-2xl font-semibold mt-2">
                 Weight
               </h1>
               <Field>

@@ -63,7 +63,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 export default function Sessions() {
   const { sessions } = useLoaderData<typeof loader>();
   return (
-    <div className="w-4/5 m-4 p-4">
+    <div className="w-4/5 m-4 p-4 h-full">
       <h1 className="font-bold text-4xl">Your planned training sessions</h1>
       <Text className = 'italic text-lg inline'>Press any training session to modify or delete it... delete is not yet implemented.</Text>
       <SessionsLayout sessions = { sessions } />
