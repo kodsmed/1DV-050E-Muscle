@@ -4,9 +4,9 @@ import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from 'app/compon
 export function SessionSelector({ sessions, callback }: { sessions: TrainingsSession[], callback: (session: TrainingsSession) => void}) {
   // return a cc div with a dropdown of all sessions
   return (
-    <div className='w-full flex flex-col py-24 justify-center items-center'>
+    <div className='w-full flex flex-col justify-center items-center'>
       <Dropdown>
-          <DropdownButton className='w-48'>Select a session to start</DropdownButton>
+          <DropdownButton className='w-48'>Select a session</DropdownButton>
           <DropdownMenu>
             {sessions.map((session) => (
               <DropdownItem key={session.id}

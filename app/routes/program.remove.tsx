@@ -1,7 +1,7 @@
 import { ActionFunctionArgs, redirect } from "@remix-run/cloudflare";
 import { TRAINING_DAY_STATUS } from "~/types/enums";
 
-// this route is used to add a new program to the database and update the status of a program in the database.
+// this route is used to remove a PENIDNG program from the database.
 // it is intended to be posted to by the program planner page.
 
 export function loader() {
@@ -18,21 +18,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (!user || !user.data) {
     return redirect("/login", { headers: context.headers });
   }
-  const program_id = body.get('id');
+  const owner_uuid = user.data.user?.id
 
-  // Update the status of a program
-  const status = body.get('status') as TRAINING_DAY_STATUS | TRAINING_DAY_STATUS.PENDING;
-  const comment = body.get('comment') as string | null;
-  if (program_id && status) {
+  const id = body.get('training_day_id');
+  const user_id = body.get('user_uuid') || owner_uuid;
+  // remove one program from the database with the provided id and status PENDING
+  if (id) {
     const response = await context.supabase
       .from('program')
-      .update({
-        status: status,
-        comment: comment,
-      })
-      .eq('id', program_id);
+      .delete()
+      .eq('training_day_id', id)
+      .eq('status', TRAINING_DAY_STATUS.PENDING)
+      .eq('owner_uuid', user_id)
+      .order('created_at', { ascending: true })
+      .limit(1);
     if (response.error) {
-      console.error('Error updating program:', response.error.message);
+      console.error('Error removing program:', response.error.message);
     }
   }
 

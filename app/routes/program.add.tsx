@@ -25,30 +25,31 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   // A new program post will only have training_day_id and date
   const training_day_id = body.get('training_day_id');
-  const date = body.get('date');
+  // If a user id is provided, use that, otherwise use authenticated user
+  const user_id = body.get('user_uuid') || owner_uuid;
   const program_id = body.get('id');
-  if (training_day_id && date && !program_id) {
+  if (training_day_id && !program_id) {
 
-    // Check if the user have a training_day already on that date
-    const existsResponse = await context.supabase
+    // Check if the user already has 7 sessions that is PENDING
+    const countResponse = await context.supabase
       .from('program')
-      .select('*')
-      .eq('owner_uuid', owner_uuid)
-      .eq('date', date as string) // date is a string
-    if (existsResponse.error) {
-      console.error('Error adding program:', existsResponse.error.message);
+      .select('id')
+      .eq('owner_uuid', user_id)
+      .eq('status', TRAINING_DAY_STATUS.PENDING)
+    if (countResponse.error) {
+      console.error('Error adding program:', countResponse.error.message);
     }
-
-    if (existsResponse.data && existsResponse.data.length > 0) {
-      console.error('Error adding program: A program already exists for this date');
+    if (countResponse.data && countResponse.data.length >= 7) {
+      console.error('Error adding program: You already have 7 sessions that are pending');
       return redirect("/program-planner", { headers: context.headers });
     }
 
+
     const newProgram: Program = {
       training_day_id: Number(training_day_id),
-      date: date as string,
       created_at: new Date().toISOString(),
-      owner_uuid: owner_uuid
+      owner_uuid: user_id as string,
+      status: TRAINING_DAY_STATUS.PENDING,
     };
     const response = await context.supabase
       .from('program')

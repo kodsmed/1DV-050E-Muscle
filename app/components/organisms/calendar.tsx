@@ -30,6 +30,9 @@ export function CalendarComponent({ changeCallback, usedDates }: { changeCallbac
     setExpanded(!expanded);
   }
 
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
   return (
     <div>
       {!expanded &&
@@ -40,7 +43,7 @@ export function CalendarComponent({ changeCallback, usedDates }: { changeCallbac
           value={value}
           onChange={onChange}
           minDetail='year'
-          minDate={new Date()}
+          maxDate={yesterday}
           tileDisabled={({date}) => {
             let conflict = false
             usedDates.forEach(usedDate => {
