@@ -74,7 +74,9 @@ see training_day_set as they are identical in every aspect apart from usage.
 
 ## program [ id: int8, created_at: timestampz, owner_uuid: uuid, traning_day_id :int8, date: date, status: TRAINING_DAY_STATUS, comment: text ]
 
-this table describes a training program, what training_day is to be / have been preformed on what date
+this table describes a training program, what training_day is to be / have been preformed on what date.
+training_days to be performed are marked as PENDING, and have null date. (date is set when the training is performed, max 7)
+training_days that have been performed or skipped are marked as DONE or SKIPPED, and have a date.
 
 - id is an auto-incremental integer used to identify the tuple,
 - created_at is a timestamp with timezone at the moment the post is created
@@ -116,6 +118,23 @@ this take stores the user roles of a user, determining what the user have access
 
   ADMIN - System owner, has access to everything, all data, and can change the role of other users.  
   USER - Standard user, limited access and can only read and change their own data.  
-  TRAINER - NOT YET IMPLEMENTED - Standard user, limited access, can read and change their own data, and read data belonging to users that have given permission.  
+  TRAINER - Standard user, limited access, can read and change their own data, and read performed training data of their clients, and create training sessions and programs for their clients.  
   GYM_ADMIN -  NOT YET IMPLEMENTED  
   GYM_OWNER - NOT YET IMPLEMENTED  
+
+### pt_invite [ id: int8, owner_uuid: uuid, created_at: timestampz, invite_hash: text ] pk id
+
+this table stores the invite hashcodes sent by trainers to users to become their clients
+
+- id is an auto-incremental integer used to identify the tuple,
+- owner_uuid is the uuid of the trainer that created the invite,
+- created_at is a timestamp with timezone at the moment the invite is created,
+- invite_hash is a text field holding the hashcode that is sent to the user
+
+### trainer_user [ id: int8, trainer_uuid: uuid, user_uuid: uuid ] pk id
+
+this table stores the relationship between a trainer and n user(s)
+
+- id is an auto-incremental integer used to identify the tuple,
+- trainer_uuid is the uuid of the trainer,
+- user_uuid is the uuid of the user
