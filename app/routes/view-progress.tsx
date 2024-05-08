@@ -1,8 +1,6 @@
-import { TrainingsSession, Set } from "~/types/sessions";
 import { useState } from "react";
 import { json, LoaderFunctionArgs, redirect } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
-import { ExerciseInterface, MuscleGroup } from "~/types/exercise";
 import { SelectView } from "~/components/organisms/select-view";
 import { LineChartWrapper } from "~/components/templates/linechart-wrapper";
 import { TimeFrame } from "~/types/enums";
@@ -39,18 +37,45 @@ export interface Exercise {
   name: string;
 }
 
-export async function loader({ context }: LoaderFunctionArgs) {
+/**
+ * The loader function for the view progress page.
+ * This new version of the loader function overfetches all the data needed for the page in one go.
+ * This is done to reduce the number of queries to the database and improve performance.
+ *
+ * NOTE: This will cause an issue if the number of posts returned will ever exceed 1000 as that is the limit for Supabase queries.
+ */
+export async function loader({ context, request }: LoaderFunctionArgs) {
   const userResponse = await context.supabase.auth.getUser();
   const user = userResponse.data?.user;
   if (!user) {
     return redirect("/login", { headers: context.headers });
   }
 
-  // Fetch all performed sessions for the user
+  // Check for a specific user query parameter
+  const url = new URL(request.url);
+  const userNumber = url.searchParams.get("user");
+
+  let uuid = null
+  if (userNumber) {
+    // get the user_uuid from the user number
+    const response = await context.supabase
+      .from('user_details')
+      .select('id')
+      .eq('user_number', userNumber);
+
+    if (response && response.data && response.data.length > 0) {
+      uuid = response.data[0].id;
+    } else {
+      return json({ allMySessions: null });
+    }
+  }
+
+  // Fetch all performed sessions for the user, default to the current user if no user is specified
   const sessionsResponse = await context.supabase
     .from('performed_training_day')
     .select('id, session_name, created_at')
-  const allMySessions = sessionsResponse.data as TrimmedTrainingsSession[];
+    .eq('owner_uuid', uuid || user.id);
+  const allMySessions = sessionsResponse?.data as TrimmedTrainingsSession[] || [];
 
   if (allMySessions.length === 0) {
     return json({ allMySessions: [] });
@@ -148,83 +173,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
   return json({ allMySessions });
 }
 
-export async function oldloader({ context }: LoaderFunctionArgs) {
-  const userResponse = await context.supabase.auth.getUser();
-  const user = userResponse.data?.user;
-  if (!user) {
-    return redirect("/login", { headers: context.headers });
-  }
-
-  // get all performed sessions for the user
-  let response = await context.supabase
-    .from('performed_training_day')
-    .select('*');
-  const allMySessions = response.data as TrainingsSession[];
-
-  response = await context.supabase
-    .from('muscle_group')
-    .select('*');
-  const allMuscleGroups = response.data as MuscleGroup[];
-
-  // get all sets for each session and adjust the data structure
-  for (const session of allMySessions) {
-    session.sets = [] as Set[];
-    response = await context.supabase
-      .from('performed_training_day_set')
-      .select('*')
-      .eq('training_day_id', session.id);
-
-    const sessionSets = response.data as { id: number, training_day_id: number, set: number }[];
-    for (const sessionSet of sessionSets) {
-      response = await context.supabase
-        .from('set')
-        .select('*')
-        .eq('id', sessionSet.set);
-
-      if (response.data) {
-        const set = response.data[0] as Set;
-        session.sets.push(set);
-      }
-
-      // get exercise for each set
-      for (const set of session.sets) {
-        response = await context.supabase
-          .from('exercises')
-          .select('*')
-          .eq('id', set.exercise);
-
-        if (response.data) {
-          set.exercise = response.data[0] as ExerciseInterface;
-        }
-
-        // get the primary muscle group for the exercise
-        response = await context.supabase
-          .from('exercise_muscle_group')
-          .select('*')
-          .eq('exercise', set.exercise.id)
-        const exerciseMuscleGroups = response.data as { id: number, exercise: number, muscle_group: number, order: number }[];
-
-        set.exercise.muscle_group = exerciseMuscleGroups
-          .map(exerciseMuscleGroup => allMuscleGroups.find(muscleGroup => muscleGroup.id === exerciseMuscleGroup.muscle_group))
-          .filter(muscleGroup => muscleGroup !== undefined) as MuscleGroup[];
-
-        if (response.data) {
-          const muscleGroup = response.data[0];
-          response = await context.supabase
-            .from('muscle_group')
-            .select('*')
-            .eq('id', muscleGroup.muscle_group);
-          if (response.data) {
-            set.exercise.muscle_group = [response.data[0] as MuscleGroup];
-          }
-        }
-      }
-    }
-  }
-
-  return json({ allMySessions });
-}
-
 
 export default function ViewProgress() {
   const data = useLoaderData<typeof loader>();
@@ -237,7 +185,7 @@ export default function ViewProgress() {
   }
   const allMySessions = data.allMySessions;
   if (!allMySessions || allMySessions.length === 0) {
-    return <div>No sessions found</div>;
+    return <div className="h-full">No sessions found</div>;
   }
   const allMySets = [] as SetDetails[];
   for (const session of allMySessions) {
