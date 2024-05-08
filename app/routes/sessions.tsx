@@ -30,8 +30,10 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       .select('id')
       .eq('user_number', userNumber);
 
-    if (response.data) {
+    if (response && response.data && response.data.length > 0) {
       uuid = response.data[0].id;
+    } else {
+      return { sessions: null };
     }
   }
 
@@ -40,7 +42,15 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     .from('training_day')
     .select('*')
     .eq('owner_uuid', uuid || user.id);
-  const sessions = response.data as TrainingsSession[];
+  let sessions = null
+
+  if (response && response.data) {
+    sessions = response.data as TrainingsSession[];
+  }
+
+  if (!sessions) {
+    return { sessions: null };
+  }
 
   // get all sets for each session and adjust the data structure
   for (const session of sessions) {
@@ -84,8 +94,11 @@ export default function Sessions() {
   return (
     <div className="w-4/5 m-4 p-4 h-full overflow-y-scroll">
       <h1 className="font-bold text-4xl">Your planned training sessions</h1>
-      <Text className = 'italic text-lg inline'>Press any training session to modify or delete it... delete is not yet implemented.</Text>
-      <SessionsLayout sessions = { sessions } />
+      <Text className = 'italic text-lg inline'>Press any training session 
+      to modify or delete it... delete is not yet implemented.</Text>
+      { sessions  && <SessionsLayout sessions = { sessions } /> }
+      { !sessions && <Text>No sessions found</Text> }
+
     </div>
   )
 }
