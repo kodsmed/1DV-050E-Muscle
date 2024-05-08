@@ -60,14 +60,17 @@ export async function createPerformedSession(client: SupabaseClient, session: Tr
       throw new Error('Error saving training_day_set');
     }
 
-    // Check if the session and date was part of the users program and if so update the status to done
-    // we don't care if this fails, it just means the session was not part of the program...
-    // also we don't need the result, so no need to check for data
+    // Insert a record in the program table to mark the session as done
     await client
       .from('program')
-      .update({ status: TRAINING_DAY_STATUS.DONE })
-      .eq('training_day_id', nativeId)
-      .eq('date', toShortDateString(new Date(data[0].created_at)));
+      .insert({
+        owner_uuid: session.owner_uuid,
+        training_day_id: nativeId,
+        status: TRAINING_DAY_STATUS.DONE,
+        created_at: new Date(),
+        comment: '',
+        date: toShortDateString(new Date())
+      })
 
   } catch (error) {
     console.log('error', error)

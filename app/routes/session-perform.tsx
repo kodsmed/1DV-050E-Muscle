@@ -54,6 +54,19 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       return redirect("/session-perform", { headers: context.headers });
     }
 
+    // check if there is a performed_training_day for this session
+    const performedResponse = await context.supabase
+      .from('performed_training_day')
+      .select('*')
+      .eq('session_id', sessionID)
+      .order('created_at', { ascending: false, nullsFirst: false })
+      .limit(1);
+
+    let performedSession = null;
+    if (performedResponse && performedResponse.data) {
+      performedSession = performedResponse.data[0];
+    }
+
     const sessions = sessionsResponse.data as TrainingsSession[];
     const allMuscleGroups = muscleGroupsResponse.data as MuscleGroup[]
     const allExercises = exercisesResponse.data as ExerciseInterface[]
@@ -62,10 +75,13 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     // get all sets for the session
     const session = sessions[0];
     session.sets = [] as Set[];
+    // if there is a performed session, get the sets from the performed_training_day_set table instead so that we can show the user what they did last time
+    const sourceOfSets = performedSession ? 'performed_training_day_set' : 'training_day_set';
+    const trainingDayID = performedSession ? performedSession.id : sessionID;
     const response = await context.supabase
-      .from('training_day_set')
+      .from(sourceOfSets)
       .select('set')
-      .eq('training_day_id', sessionID);
+      .eq('training_day_id', trainingDayID);
     if (!response.data) {
       return redirect("/session-perform", { headers: context.headers });
     }
