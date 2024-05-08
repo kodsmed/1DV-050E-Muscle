@@ -57,7 +57,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       .from('training_day')
       .select('*')
       .eq('id', sessionId);
-    if (!response.data) {
+    if (!response || !response.data || response.data.length === 0) {
       return json({ exercises, session: {} as TrainingsSession, sets: [], user, allMuscleGroups });
     }
 
@@ -197,7 +197,7 @@ export default function SessionPlanner() {
   }
 
   return (
-    <div className="w-5/6 m-4 p-4 h-full">
+    <div className="w-5/6 m-4 p-4 h-full overflow-y-scroll">
       <h1 className="font-bold text-4xl">Session planner</h1>
       <Exercises exercises={exercises} clickHandler={addExerciseHandler} muscleGroups={allMuscleGroups} />
       <SessionPlannerForm session={session} sets={localSets} updateCallback={updateSet} saveCallback={savePlannedSession} removeSetCallback={handleRemoveSet}/>
