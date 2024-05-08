@@ -54,12 +54,10 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ context, request }: LoaderFunctionArgs) {
-  console.log('action')
   const body = await request.formData();
   const hash = body.get('invite_hash') as string;
   const clientUUID = body.get('client_uuid') as string;
   const result = await linkUserAndPTBasedOnInviteHash(context.supabase, clientUUID, hash);
-  console.log(result);
   return redirect("/", { headers: context.headers });
 }
 
@@ -68,7 +66,6 @@ export default function PTLinkup() {
   const submit = useSubmit();
 
   async function handleSubmit() {
-    console.log('submitting')
     const formData = new FormData();
     formData.append('trainer_uuid', data.trainerUUID);
     formData.append('client_uuid', data.user.id);

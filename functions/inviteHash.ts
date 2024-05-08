@@ -1,11 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function createPTInvite(client: SupabaseClient): Promise<string> {
-    console.log('createPTInvite', client)
     const hash = generateInviteHash(24);
-    console.log('hash :>> ', hash);
     const isUnique = await checkHashUniqueness(hash, client);
-    console.log('isUnique :>> ', isUnique);
     if (!isUnique) {
         return createPTInvite(client);
     }
@@ -33,14 +30,10 @@ export function generateInviteHash(length: number) {
 }
 
 export async function checkHashUniqueness(hash: string, client: SupabaseClient) {
-    console.log('checkHashUniqueness')
     const {data, error} = await client
         .from('pt_invite')
         .select('*')
         .eq('invite_hash', hash);
-    console.log('done')
-    console.log('data :>> ', data);
-    console.log('error :>> ', error);
     if (error) {
         console.error('Error checking hash uniqueness', error);
         return false;
