@@ -34,11 +34,25 @@ export function PerformableSetCard(
 
   function setStates({ changedWeight, reps, duration, repRest }: { changedWeight: number | null, reps: number | null, duration: number | null, repRest: number | null }) {
 
-    currentSet.weight = changedWeight || weight;
-    currentSet.repetitions = reps || repetitions;
-    currentSet.duration_minutes = duration || minutes;
-    currentSet.rest_seconds = repRest || stateRepRest;
+    if (changedWeight === null && reps === null && duration === null && repRest === null) {
+      return;
+    }
 
+    if (changedWeight !== null) {
+      currentSet.weight = changedWeight;
+    }
+
+    if (reps !== null) {
+      currentSet.repetitions = reps;
+    }
+
+    if (duration !== null) {
+      currentSet.duration_minutes = duration;
+    }
+
+    if (repRest !== null) {
+      currentSet.rest_seconds = repRest;
+    }
   }
 
   function updateWeight(value: number) {
