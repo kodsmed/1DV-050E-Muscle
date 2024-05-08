@@ -62,10 +62,12 @@ as an example, what sets are included in "Leg day"
 - training_day_id is a foreign key to training_day that identifies what training_day the set is added to
 - set is a foreign key that indicates what set is added to the training_day
 
-## performed_training_day [ id: int8, created_at: timestampz, owner_uuid: uuid, session_name: text ] pk id
+## performed_training_day [ id: int8, created_at: timestampz, owner_uuid: uuid, session_name: text, session_id: int8 ] pk id
 
 this table describes training_day that is preformed in contrast to planned,  
-see training_day as they are identical in every aspect apart from usage.
+
+- session_id is a foreign key that links the performed_training_day to the training_day that was preformed,
+see training_day as any other property they are identical in every aspect apart from usage.
 
 ## performed_training_day_set [ id: int8, training_day_id: int8, set: int8 ] pk id
 
@@ -96,11 +98,12 @@ training_days that have been performed or skipped are marked as DONE or SKIPPED,
   SKIPPED_WEAK - was not completed due to muscle fatigue  
   SKIPPED_OTHER - was not completed due to ???  
 
-## user_details [ id: uuid, display_name: text, first_name: text, last_name: text, avarat_url: text, current_weight: float, target_weight: float ] pk id
+## user_details [ id: uuid, user_number:int8, display_name: text, first_name: text, last_name: text, avarat_url: text, current_weight: float, target_weight: float ] pk id
 
 this table stores non-auth and non-sensitive information about the user
 
 - id is a foreign key linking to the auth database
+- user_number is a unique number given to the user, used to identify the user in the system and used in public facing parts of the application in place of the id:uuid
 - display_name is the users username
 - first_name is the users given name, if the user wants to provide it
 - last_name is the users sir name, if the user wants to provide it
