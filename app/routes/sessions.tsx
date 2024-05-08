@@ -12,15 +12,34 @@ import { Text } from "~/components/catalyst/text";
 /**
  * Route for the training sessions planner page
  */
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ context, request }: LoaderFunctionArgs) {
   const userResponse = await context.supabase.auth.getUser();
   const user = userResponse.data?.user;
   if (!user) {
     return redirect ("/login", { headers: context.headers });
   }
+
+  const url = new URL(request.url);
+  const userNumber = url.searchParams.get("user");
+
+  let uuid = null
+  if (userNumber) {
+    // get the user_uuid from the user number
+    const response = await context.supabase
+      .from('user_details')
+      .select('id')
+      .eq('user_number', userNumber);
+
+    if (response.data) {
+      uuid = response.data[0].id;
+    }
+  }
+
+
   let response = await context.supabase
     .from('training_day')
-    .select('*');
+    .select('*')
+    .eq('owner_uuid', uuid || user.id);
   const sessions = response.data as TrainingsSession[];
 
   // get all sets for each session and adjust the data structure
@@ -57,13 +76,13 @@ export async function loader({ context }: LoaderFunctionArgs) {
     }
   }
 
-  return { sessions };
+  return { sessions, forUser: uuid};
 }
 
 export default function Sessions() {
   const { sessions } = useLoaderData<typeof loader>();
   return (
-    <div className="w-4/5 m-4 p-4 h-full">
+    <div className="w-4/5 m-4 p-4 h-full overflow-y-scroll">
       <h1 className="font-bold text-4xl">Your planned training sessions</h1>
       <Text className = 'italic text-lg inline'>Press any training session to modify or delete it... delete is not yet implemented.</Text>
       <SessionsLayout sessions = { sessions } />
