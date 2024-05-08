@@ -19,19 +19,43 @@ type WeekProgram = {
   performed: boolean
 }
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  // Load the user
-  const user = await context.supabase.auth.getUser();
+export async function loader({ context, request }: LoaderFunctionArgs) {
+  const userResponse = await context.supabase.auth.getUser();
+  const user = userResponse.data?.user;
   if (!user) {
     return redirect("/login", { headers: context.headers });
+  }
+
+  const url = new URL(request.url);
+  const userNumber = url.searchParams.get("user");
+
+  let uuid = null
+  if (userNumber) {
+    // get the user_uuid from the user number
+    const response = await context.supabase
+      .from('user_details')
+      .select('id')
+      .eq('user_number', userNumber);
+
+    if (response && response.data && response.data.length > 0) {
+      uuid = response.data[0].id;
+    } else {
+      return json({ sessions: null, program: null, history: null });
+    }
+  }
+
+  let forClient = false;
+  if (uuid && (user.id !== uuid)) {
+    forClient = uuid;
   }
 
   // Load the user's planned sessions "training_day" from the database
   const response = await context.supabase
     .from('training_day')
     .select('*')
-  if (!response || !response.data) {
-    return json({ sessions: [] });
+    .eq('owner_uuid', uuid || user.id);
+  if (!response || !response.data || response.data.length === 0) {
+    return json({ sessions: [], program: null, history: null, forClient: forClient });
   }
 
   // Load the user's program "program" from the database if any
@@ -40,7 +64,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     .select('*')
     .order('id', { ascending: false })
   if (!programResponse || !programResponse.data) {
-    return json({ sessions: response.data, program: null, history: null });
+    return json({ sessions: response.data, program: null, history: null, forClient: forClient });
   }
 
   const historyResponse: Program[] = programResponse.data.filter((program: Program) => program.status !== null && program.status !== TRAINING_DAY_STATUS.PENDING);
@@ -69,14 +93,15 @@ export async function loader({ context }: LoaderFunctionArgs) {
     }
   });
 
-  return json({ sessions: response.data, program: programData, history: historyResponse });
+  return json({ sessions: response.data, program: programData, history: historyResponse, forClient: forClient, userNumber: userNumber});
 }
 
 export default function ProgramPlanner() {
   // Load the data from the loader
-  const data = useLoaderData<typeof loader>() as { sessions: TrainingsSession[], program: WeekProgram[] | null, history: Program[] | null };
+  const data = useLoaderData<typeof loader>() as { sessions: TrainingsSession[] | null, program: WeekProgram[] | null, history: Program[] | null, forClient: boolean | string, userNumber: string};
   const submit = useSubmit();
   const usedDates = [] as Date[];
+
   data.history?.forEach(program => {
     usedDates.push(new Date(program.date || ''));
   });
@@ -90,6 +115,15 @@ export default function ProgramPlanner() {
   const [stateHistory, setHistory] = useState<Program[]>(data.history || []);
   const [comment, setComment] = useState<string>('');
   const [status, setStatus] = useState<TRAINING_DAY_STATUS | null>(null);
+
+  if (!sessions) {
+    return (
+      <div className="w-5/6 h-full">
+        <h2 className="text-bold text-2xl">No user data found</h2>
+      </div>
+    );
+  }
+
 
   // Function to add a session to the program
   function addProgram() {
@@ -107,7 +141,11 @@ export default function ProgramPlanner() {
 
     // Save the program to the database
     const formData = new FormData();
-    formData.append('training_day_id', `${selectedSession.id}`);
+    formData.append('training_day_id', `${selectedSession.id}`)
+    if (data.forClient != false) {
+      formData.append('user_uuid', data.forClient as string)
+      formData.append('user_number', data.userNumber as string)
+    }
     submit(formData, {
       method: 'post',
       action: '/program/add',
@@ -138,6 +176,10 @@ export default function ProgramPlanner() {
     // Remove the program from the database
     const formData = new FormData();
     formData.append('training_day_id', `${selectedSession.id}`);
+    if (data.forClient != false) {
+      formData.append('user_uuid', data.forClient as string);
+      formData.append('user_number', data.userNumber as string);
+    }
     submit(formData, {
       method: 'post',
       action: '/program/remove',
@@ -157,7 +199,7 @@ export default function ProgramPlanner() {
       date: selectedDate.toISOString(),
       status: status,
       comment: comment || ''
-     }
+    }
     setHistory([program, ...stateHistory]);
     saveHistoryProgram(program);
   }
@@ -188,7 +230,7 @@ export default function ProgramPlanner() {
                 <Button disabled={true} className="flex flex-col gap-8 mb-8 w-64">
                   <p>
                     {// Get the session from the id
-                      sessions.find(session => session.id === week.program.training_day_id)?.session_name
+                      sessions?.find(session => session.id === week.program.training_day_id)?.session_name
                     }
                   </p>
                   <p>Performed this week</p>
@@ -220,12 +262,15 @@ export default function ProgramPlanner() {
       </div>
       <div className="border-t-2 border-dashed border-slate-300 mt-4 p-4">
         <h2 className="font-bold font-xl mb-2">Program history</h2>
-        <div className="flex flex-row gap-8 w-full">
-          <SessionAndDateSelector sessions={sessions} selectedSession={selectedSession} setSelectedSession={setSelectedSession} setSelectedDate={setSelectedDate} usedDates={usedDates} />
-          <input type="text" name='comment' className="max-h-10" placeholder="Add a comment" onChange={(event) => { setComment(event.target.value) }} />
-          <StatusSelector status={status} updateStatus={updateStatus} />
-          <Button className="max-h-10" onClick={historyAddHandler}>Add to program history</ Button>
-        </div>
+        {// Only allow the actual user to add to the program history... trainers can't add to the program history, only the program itself.
+        data.forClient === false && (
+          <div className="flex flex-row gap-8 w-full">
+            <SessionAndDateSelector sessions={sessions} selectedSession={selectedSession} setSelectedSession={setSelectedSession} setSelectedDate={setSelectedDate} usedDates={usedDates} />
+            <input type="text" name='comment' className="max-h-10" placeholder="Add a comment" onChange={(event) => { setComment(event.target.value) }} />
+            <StatusSelector status={status} updateStatus={updateStatus} />
+            <Button className="max-h-10" onClick={historyAddHandler}>Add to program history</ Button>
+          </div>
+        )}
         <ul className="mt-4">
           {stateHistory?.map(program => (
             <li key={program.id} className="flex flex-row gap-8 mb-8">

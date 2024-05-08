@@ -26,8 +26,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
   // A new program post will only have training_day_id and date
   const training_day_id = body.get('training_day_id');
   // If a user id is provided, use that, otherwise use authenticated user
-  const user_id = body.get('user_uuid') || owner_uuid;
+  const body_user_uuid = body.get('user_uuid') as string | null;
+  const user_number = body.get('user_number') as string | null;
+  const user_id = body_user_uuid ? body_user_uuid : owner_uuid;
   const program_id = body.get('id');
+
+  const redirectUrl = user_number ? `/program-planner?user=${user_number}` : '/program-planner';
+
   if (training_day_id && !program_id) {
 
     // Check if the user already has 7 sessions that is PENDING
@@ -41,7 +46,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
     if (countResponse.data && countResponse.data.length >= 7) {
       console.error('Error adding program: You already have 7 sessions that are pending');
-      return redirect("/program-planner", { headers: context.headers });
+      return redirect(redirectUrl, { headers: context.headers });
     }
 
 
@@ -75,5 +80,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   }
 
-  return redirect("/program-planner", { headers: context.headers });
+  return redirect(redirectUrl, { headers: context.headers });
 }

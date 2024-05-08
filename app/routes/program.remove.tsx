@@ -22,6 +22,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const id = body.get('training_day_id');
   const user_id = body.get('user_uuid') || owner_uuid;
+  const user_number = body.get('user_number') || null;
+
+  const redirectUrl = user_number ? `/program-planner?user=${user_number}` : '/program-planner';
+
   // remove one program from the database with the provided id and status PENDING
   if (id) {
     const response = await context.supabase
@@ -37,5 +41,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   }
 
-  return redirect("/program-planner", { headers: context.headers });
+  return redirect(redirectUrl, { headers: context.headers });
 }
