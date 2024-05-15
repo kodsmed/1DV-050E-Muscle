@@ -87,12 +87,16 @@ export default function Index() {
                 {data.program ? (
                   <div>
                     <p className="text-lg text-center mt-4">You have a session planned for today.</p>
-                    <Button href={"/session-perform?session=" + data.program.training_day_id} className="w-full">Perform your planned {data.program.session_name}</Button>
+                    <a href={"/session-perform?session=" + data.program.training_day_id} className="w-full">
+                      <Button className="w-full">Perform your planned {data.program.session_name}</Button>
+                    </a>
                   </div>
                 ) : (
                   <div>
                     <p className="text-lg text-center mt-4">You have no session planned for today.</p>
-                    <Button href="/session-perform" className="w-full">Start a session</Button>
+                    <a href="/session-perform" className="w-full">
+                      <Button className="w-full">Start a session</Button>
+                    </a>
                   </div>
                 )}
               </div>
