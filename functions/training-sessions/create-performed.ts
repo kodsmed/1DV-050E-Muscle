@@ -9,7 +9,7 @@ export async function createPerformedSession(client: SupabaseClient, session: Tr
     const nativeId = session.id;
     const { data } = await client
       .from('performed_training_day')
-      .insert({ session_name: session.session_name, owner_uuid: session.owner_uuid, created_at: new Date() })
+      .insert({ session_name: session.session_name, session_id: session.id, owner_uuid: session.owner_uuid, created_at: new Date() })
       .select();
     if (!data) {
       throw new Error('Error creating session');
